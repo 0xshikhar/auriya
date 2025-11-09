@@ -13,7 +13,7 @@ import { useCreateAccessPolicy } from '@/hooks/contracts/useCreateAccessPolicy';
 import { useLinkSealPolicy } from '@/hooks/contracts/useLinkSealPolicy';
 import { DEFAULT_CONTENT_REGISTRY_ID } from '@/lib/constants';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { FileText, Image as ImageIcon, Video, Music, File as FileIcon, Lock, CheckCircle2, AlertCircle, Upload, Shield } from 'lucide-react';
+import { FileText, Image as ImageIcon, Video, Music, File as FileIcon, Lock, CheckCircle2, AlertCircle, Upload, Shield, ArrowLeft, ExternalLink } from 'lucide-react';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { useCurrentAccount } from '@mysten/dapp-kit';
@@ -22,7 +22,7 @@ import { uploadToWalrus } from '@/lib/walrus';
 
 export default function NewContentPage() {
   const currentAccount = useCurrentAccount();
-  const { profile } = useCreatorProfile(currentAccount?.address);
+  const { profile, hasProfile } = useCreatorProfile(currentAccount?.address);
   const router = useRouter();
   
   const [registryId, setRegistryId] = useState<string>(DEFAULT_CONTENT_REGISTRY_ID);
@@ -369,6 +369,18 @@ export default function NewContentPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-5xl mx-auto px-6 py-12">
+        {/* Back Navigation */}
+        <div className="mb-6">
+          <Button
+            variant="ghost"
+            onClick={() => router.push('/dashboard/content')}
+            className="text-gray-600 hover:text-black -ml-2"
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to Content
+          </Button>
+        </div>
+
         <div className="mb-12">
           <h1 className="text-5xl font-bold text-black mb-4">Create Gated Content</h1>
           <p className="text-xl text-gray-600">Upload to Walrus and publish content for your NFT subscribers.</p>

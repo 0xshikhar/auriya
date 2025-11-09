@@ -2,12 +2,13 @@
 
 import Link from 'next/link';
 import { useCurrentAccount, useSuiClientQuery, useConnectWallet, useWallets } from '@mysten/dapp-kit';
-import { BarChart3, FileText, Settings, TrendingUp, Users, DollarSign, Wallet, CheckCircle2, Sparkles } from 'lucide-react';
+import { BarChart3, FileText, Settings, TrendingUp, Users, DollarSign, Wallet, CheckCircle2, Sparkles, ExternalLink, User } from 'lucide-react';
 import { startZkLogin } from '@/lib/enoki';
 import { useCreatorProfile } from '@/hooks/contracts/useCreatorProfile';
 import { useCreatorTiers } from '@/hooks/contracts/useCreatorTiers';
 import { useCreatorContent } from '@/hooks/contracts/useCreatorContent';
 import { isEnokiWallet, type EnokiWallet } from '@mysten/enoki';
+import { Button } from '@/components/ui/button';
 
 export default function DashboardPage() {
   const account = useCurrentAccount();
@@ -51,9 +52,20 @@ export default function DashboardPage() {
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-6 py-8">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-black">Creator Dashboard</h1>
-          <p className="text-gray-600 mt-2">Manage your NFT subscriptions, content, and earnings on Sui.</p>
+        <div className="mb-8 flex items-center justify-between">
+          <div>
+            <h1 className="text-4xl font-bold text-black">Creator Dashboard</h1>
+            <p className="text-gray-600 mt-2">Manage your NFT subscriptions, content, and earnings on Sui.</p>
+          </div>
+          {hasProfile && account?.address && (
+            <Link href={`/${account.address}`}>
+              <Button variant="outline" className="gap-2">
+                <User className="w-4 h-4" />
+                View Public Profile
+                <ExternalLink className="w-3 h-3" />
+              </Button>
+            </Link>
+          )}
         </div>
 
         {!account && (

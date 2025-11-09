@@ -3,9 +3,11 @@
 import React, { useState, useEffect } from 'react';
 import { useCreateTiers, TierInput } from '@/hooks/contracts/useCreateTiers';
 import { useCreatorTiers } from '@/hooks/contracts/useCreatorTiers';
-import { Plus, Trash2, DollarSign, Calendar, Tag, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
+import { Plus, Trash2, DollarSign, Calendar, Tag, CheckCircle2, AlertCircle, Loader2, ArrowLeft } from 'lucide-react';
 import { useCurrentAccount } from '@mysten/dapp-kit';
 import { toast } from 'sonner';
+import Link from 'next/link';
+import { Button } from '@/components/ui/button';
 
 export default function TiersPage() {
   const currentAccount = useCurrentAccount();
@@ -164,6 +166,16 @@ export default function TiersPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-5xl mx-auto px-6 py-12">
+        {/* Back Navigation */}
+        <div className="mb-6">
+          <Link href="/dashboard">
+            <Button variant="ghost" className="text-gray-600 hover:text-black -ml-2">
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Dashboard
+            </Button>
+          </Link>
+        </div>
+
         <div className="mb-12">
           <h1 className="text-5xl font-bold text-black mb-4">NFT Subscription Tiers</h1>
           <p className="text-xl text-gray-600">Configure up to 5 membership tiers. Fans mint NFTs to subscribe, revenue flows directly to your wallet.</p>

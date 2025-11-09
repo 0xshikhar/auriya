@@ -9,7 +9,7 @@ import { useCreatorProfile } from '@/hooks/contracts/useCreatorProfile';
 import { useCreatorContent } from '@/hooks/contracts/useCreatorContent';
 import { DecryptedContentCard } from '@/components/content/DecryptedContentCard';
 import { getWalrusUrl } from '@/lib/walrus';
-import { FileText, Plus, Image as ImageIcon, Video, Music, File, Lock, Eye, Heart, Calendar, AlertCircle, MoreVertical } from 'lucide-react';
+import { FileText, Plus, Image as ImageIcon, Video, Music, File, Lock, Eye, Heart, Calendar, AlertCircle, MoreVertical, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { useLinkContentRegistry } from '@/hooks/contracts/useLinkContentRegistry';
@@ -109,6 +109,16 @@ function ContentPageInner() {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-6 py-8">
+        {/* Back Navigation */}
+        <div className="mb-6">
+          <Link href="/dashboard">
+            <Button variant="ghost" className="text-gray-600 hover:text-black -ml-2">
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Dashboard
+            </Button>
+          </Link>
+        </div>
+
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>

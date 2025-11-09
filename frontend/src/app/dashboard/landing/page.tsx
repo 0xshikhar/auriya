@@ -9,7 +9,8 @@ import { useCreateLandingPage, useUpdateLandingPage, usePublishLandingPage, useL
 import { useCreatorProfile } from '@/hooks/contracts/useCreatorProfile';
 import { cacheLandingPage, getCachedLandingPage } from '@/lib/landing-storage';
 import Link from 'next/link';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, ArrowLeft } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 export default function LandingPageBuilderPage() {
   const account = useCurrentAccount();
@@ -156,29 +157,36 @@ export default function LandingPageBuilderPage() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gumroad-pink mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading your data...</p>
+          <p className="text-gray-600">Loading...</p>
         </div>
       </div>
     );
   }
 
-  // Require profile to be created first
+  // Show profile requirement warning
   if (!hasProfile) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="max-w-md mx-auto text-center p-8">
-          <div className="mb-6 p-6 bg-amber-50 border-2 border-amber-200 rounded-xl">
-            <AlertCircle className="w-12 h-12 text-amber-600 mx-auto mb-4" />
-            <h1 className="text-2xl font-bold mb-2">Profile Required</h1>
+      <div className="min-h-screen bg-gray-50">
+        <div className="max-w-7xl mx-auto px-6 py-8">
+          <div className="mb-6">
+            <Link href="/dashboard">
+              <Button variant="ghost" className="text-gray-600 hover:text-black -ml-2">
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back to Dashboard
+              </Button>
+            </Link>
+          </div>
+          <div className="max-w-md mx-auto py-12 bg-white border border-gray-200 rounded-xl text-center">
+            <AlertCircle className="w-16 h-16 text-yellow-500 mx-auto mb-4" />
+            <h2 className="text-2xl font-bold text-black mb-2">Create Your Profile First</h2>
             <p className="text-gray-600 mb-6">
-              You need to create your creator profile before customizing your landing page.
-              Your profile provides the basic information (name, bio, images) that will be used on your landing page.
+              You need to create a creator profile before customizing your landing page.
             </p>
-            <Link 
+            <Link
               href="/dashboard/setup"
-              className="inline-block bg-black text-white px-6 py-3 rounded-full hover:bg-gray-800 transition font-semibold"
+              className="inline-block bg-black text-white px-6 py-3 rounded-lg hover:bg-gray-800 transition font-medium"
             >
-              Create Profile First →
+              Create Profile
             </Link>
           </div>
         </div>
@@ -188,19 +196,17 @@ export default function LandingPageBuilderPage() {
 
   return (
     <div>
-      {!existingPage && profile && (
-        <div className="bg-blue-50 border-b-2 border-blue-200 p-4">
-          <div className="max-w-7xl mx-auto flex items-start gap-3">
-            <AlertCircle className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
-            <div className="flex-1">
-              <p className="text-sm text-blue-900">
-                <strong>Welcome!</strong> We&apos;ve pre-filled your landing page with your profile information. 
-                Customize the sections, theme, and content below, then click <strong>Save</strong> to store on Walrus.
-              </p>
-            </div>
+      <div className="bg-blue-50 border-b-2 border-blue-200 p-4">
+        <div className="max-w-7xl mx-auto flex items-start gap-3">
+          <AlertCircle className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+          <div className="flex-1">
+            <p className="text-sm text-blue-900">
+              <strong>Welcome!</strong> We&apos;ve pre-filled your landing page with your profile information. 
+              Customize the sections, theme, and content below, then click <strong>Save</strong> to store on Walrus.
+            </p>
           </div>
         </div>
-      )}
+      </div>
       
       <PageBuilder
         creatorAddress={account.address}
