@@ -48,7 +48,6 @@ module subscription::subscription {
         creator: address,
         subscriber: address,
         tier_id: u8,
-        tier_name: String,
         purchased_at: u64,
         expires_at: u64,
         auto_renew: bool,
@@ -57,7 +56,7 @@ module subscription::subscription {
     /// Platform treasury for fees (shared object)
     public struct PlatformTreasury has key {
         id: UID,
-        balance: u64,
+        owner: address,
         total_fees_collected: u64,
     }
     
@@ -107,7 +106,7 @@ module subscription::subscription {
     fun init(ctx: &mut TxContext) {
         let treasury = PlatformTreasury {
             id: object::new(ctx),
-            balance: 0,
+            owner: tx_context::sender(ctx),
             total_fees_collected: 0,
         };
         transfer::share_object(treasury);
@@ -183,14 +182,16 @@ module subscription::subscription {
         // Validate tier exists
         assert!(tier_id > 0, EInvalidTierId);
         let tier = get_tier(subs, tier_id);
+        let price_mist = tier.price_mist;
+        let duration_ms = tier.duration_ms;
         
         // Verify payment amount
         let payment_amount = coin::value(&payment);
-        assert!(payment_amount >= tier.price_mist, EInsufficientPayment);
+        assert!(payment_amount >= price_mist, EInsufficientPayment);
         
         // Calculate fees
-        let platform_fee = (tier.price_mist * subs.platform_fee_bps) / BASIS_POINTS_TOTAL;
-        let creator_amount = tier.price_mist - platform_fee;
+        let platform_fee = (price_mist * subs.platform_fee_bps) / BASIS_POINTS_TOTAL;
+        let creator_amount = price_mist - platform_fee;
         
         // Split payment
         let platform_coin = coin::split(&mut payment, platform_fee, ctx);
@@ -199,9 +200,8 @@ module subscription::subscription {
         // Transfer to creator
         transfer::public_transfer(creator_coin, subs.creator);
         
-        // Add to treasury
-        let platform_balance = coin::into_balance(platform_coin);
-        treasury.balance = treasury.balance + coin::value(&platform_coin);
+        // Add to treasury: move platform fee coin to treasury owner and account fees
+        transfer::public_transfer(platform_coin, treasury.owner);
         treasury.total_fees_collected = treasury.total_fees_collected + platform_fee;
         
         // Return excess payment
@@ -213,7 +213,7 @@ module subscription::subscription {
         
         // Calculate expiry
         let current_time = clock::timestamp_ms(clock);
-        let expires_at = current_time + tier.duration_ms;
+        let expires_at = current_time + duration_ms;
         
         // Mint NFT
         let nft = SubscriptionNFT {
@@ -221,7 +221,6 @@ module subscription::subscription {
             creator: subs.creator,
             subscriber: tx_context::sender(ctx),
             tier_id,
-            tier_name: tier.name,
             purchased_at: current_time,
             expires_at,
             auto_renew: false,
@@ -231,14 +230,14 @@ module subscription::subscription {
         
         // Update stats
         subs.active_subscriber_count = subs.active_subscriber_count + 1;
-        subs.total_revenue_mist = subs.total_revenue_mist + tier.price_mist;
+        subs.total_revenue_mist = subs.total_revenue_mist + price_mist;
         
         event::emit(SubscriptionPurchased {
             nft_id,
             creator: subs.creator,
             subscriber: tx_context::sender(ctx),
             tier_id,
-            price_mist: tier.price_mist,
+            price_mist: price_mist,
             expires_at,
         });
         
@@ -258,19 +257,20 @@ module subscription::subscription {
         assert!(nft.creator == subs.creator, ENotOwner);
         
         let tier = get_tier(subs, nft.tier_id);
-        assert!(coin::value(&payment) >= tier.price_mist, EInsufficientPayment);
+        let price_mist = tier.price_mist;
+        let duration_ms = tier.duration_ms;
+        assert!(coin::value(&payment) >= price_mist, EInsufficientPayment);
         
         // Process payment (same as purchase)
-        let platform_fee = (tier.price_mist * subs.platform_fee_bps) / BASIS_POINTS_TOTAL;
-        let creator_amount = tier.price_mist - platform_fee;
+        let platform_fee = (price_mist * subs.platform_fee_bps) / BASIS_POINTS_TOTAL;
+        let creator_amount = price_mist - platform_fee;
         
         let platform_coin = coin::split(&mut payment, platform_fee, ctx);
         let creator_coin = coin::split(&mut payment, creator_amount, ctx);
         
         transfer::public_transfer(creator_coin, subs.creator);
         
-        let platform_balance = coin::into_balance(platform_coin);
-        treasury.balance = treasury.balance + platform_fee;
+        transfer::public_transfer(platform_coin, treasury.owner);
         treasury.total_fees_collected = treasury.total_fees_collected + platform_fee;
         
         if (coin::value(&payment) > 0) {
@@ -283,16 +283,16 @@ module subscription::subscription {
         let current_time = clock::timestamp_ms(clock);
         if (current_time > nft.expires_at) {
             // Expired - start from now
-            nft.expires_at = current_time + tier.duration_ms;
+            nft.expires_at = current_time + duration_ms;
         } else {
             // Active - extend from current expiry
-            nft.expires_at = nft.expires_at + tier.duration_ms;
+            nft.expires_at = nft.expires_at + duration_ms;
         };
         
         event::emit(SubscriptionRenewed {
             nft_id: object::id(nft),
             new_expiry: nft.expires_at,
-            amount_paid: tier.price_mist,
+            amount_paid: price_mist,
         });
     }
     
@@ -345,10 +345,6 @@ module subscription::subscription {
     
     public fun get_tier_id(nft: &SubscriptionNFT): u8 {
         nft.tier_id
-    }
-    
-    public fun get_tier_name(nft: &SubscriptionNFT): String {
-        nft.tier_name
     }
     
     public fun get_expires_at(nft: &SubscriptionNFT): u64 {

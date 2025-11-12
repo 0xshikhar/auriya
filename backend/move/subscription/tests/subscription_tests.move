@@ -73,7 +73,7 @@ module subscription::subscription_tests {
     #[test]
     fun test_purchase_subscription() {
         let creator = @0xCAFE;
-        let fan = @0xFAN;
+        let fan = @0xF00D;
         let mut scenario = setup_test(creator);
         
         create_test_tiers(&mut scenario, creator);
@@ -121,7 +121,7 @@ module subscription::subscription_tests {
     #[test]
     fun test_renew_subscription() {
         let creator = @0xCAFE;
-        let fan = @0xFAN;
+        let fan = @0xF00D;
         let mut scenario = setup_test(creator);
         
         create_test_tiers(&mut scenario, creator);
@@ -185,7 +185,7 @@ module subscription::subscription_tests {
     #[test]
     fun test_is_active() {
         let creator = @0xCAFE;
-        let fan = @0xFAN;
+        let fan = @0xF00D;
         let mut scenario = setup_test(creator);
         
         create_test_tiers(&mut scenario, creator);

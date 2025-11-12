@@ -4,7 +4,7 @@
 /// Module: creator_profile
 /// Manages creator identities and metadata on Auriya platform
 module creator_profile::creator_profile {
-    use sui::object::{Self, UID};
+    use sui::object::{Self, UID, ID};
     use sui::tx_context::{Self, TxContext};
     use sui::transfer;
     use sui::clock::{Self, Clock};
@@ -87,7 +87,7 @@ module creator_profile::creator_profile {
     // === Public Entry Functions ===
     
     /// Create a new creator profile
-    public entry fun create_profile(
+    public fun create_profile(
         registry: &mut ProfileRegistry,
         display_name: String,
         bio: String,
@@ -103,6 +103,8 @@ module creator_profile::creator_profile {
         assert!(!string::is_empty(&banner_walrus_id), EEmptyWalrusId);
         assert!(!string::is_empty(&category), EEmptyCategory);
         
+        let display_name_copy = copy display_name;
+
         let profile = CreatorProfile {
             id: object::new(ctx),
             owner: tx_context::sender(ctx),
@@ -125,7 +127,7 @@ module creator_profile::creator_profile {
         event::emit(ProfileCreated {
             profile_id,
             owner: tx_context::sender(ctx),
-            display_name: profile.display_name,
+            display_name: display_name_copy,
             timestamp,
         });
         
@@ -135,7 +137,7 @@ module creator_profile::creator_profile {
     }
     
     /// Update profile metadata
-    public entry fun update_profile(
+    public fun update_profile(
         profile: &mut CreatorProfile,
         display_name: String,
         bio: String,
@@ -162,22 +164,23 @@ module creator_profile::creator_profile {
     }
     
     /// Link a SuiNS name to the profile
-    public entry fun link_suins(
+    public fun link_suins(
         profile: &mut CreatorProfile,
         suins_name: String,
         ctx: &TxContext
     ) {
         assert!(profile.owner == tx_context::sender(ctx), ENotOwner);
+        let suins_copy = copy suins_name;
         profile.suins_name = option::some(suins_name);
         
         event::emit(SuiNSLinked {
             profile_id: object::id(profile),
-            suins_name: profile.suins_name,
-        });
+            suins_name: suins_copy,
+   });
     }
     
     /// Add a social media link
-    public entry fun add_social_link(
+    public fun add_social_link(
         profile: &mut CreatorProfile,
         link: String,
         ctx: &TxContext

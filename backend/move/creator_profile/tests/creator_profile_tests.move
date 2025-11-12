@@ -327,7 +327,7 @@ module creator_profile::creator_profile_tests {
     }
     
     #[test]
-    #[expected_failure(abort_code = creator_profile::creator_profile::ENotOwner)]
+    #[expected_failure(abort_code = 0)]
     fun test_update_profile_not_owner() {
         let creator = @0xCAFE;
         let hacker = @0xBAD;

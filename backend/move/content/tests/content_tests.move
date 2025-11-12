@@ -143,7 +143,7 @@ module content::content_tests {
     #[test]
     fun test_record_view() {
         let creator = @0xCAFE;
-        let viewer = @0xVIEW;
+        let viewer = @0xBEEF;
         let mut scenario = test_scenario::begin(creator);
         
         // Setup
@@ -201,7 +201,7 @@ module content::content_tests {
     #[test]
     fun test_like_post() {
         let creator = @0xCAFE;
-        let liker = @0xLIKE;
+        let liker = @0xD00D;
         let mut scenario = test_scenario::begin(creator);
         
         // Setup
