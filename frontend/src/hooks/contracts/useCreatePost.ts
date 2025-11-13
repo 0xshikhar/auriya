@@ -47,7 +47,7 @@ export function useCreatePost() {
 
     const res = await signAndExecute.mutateAsync({
       transaction: tx,
-      options: { showEffects: true, showObjectChanges: true },
+      // options: { showEffects: true, showObjectChanges: true },
     });
 
     return res;

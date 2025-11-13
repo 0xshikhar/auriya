@@ -45,10 +45,7 @@ export function useCreateProfile() {
 
     tx.setGasBudget(20_000_000);
 
-    const res = await signAndExecute.mutateAsync({
-      transaction: tx,
-      options: { showEffects: true, showObjectChanges: true },
-    });
+    const res = await signAndExecute.mutateAsync({ transaction: tx });
 
     return res;
   }, [signAndExecute]);

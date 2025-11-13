@@ -31,10 +31,7 @@ export function useLikePost() {
 
     tx.setGasBudget(10_000_000);
 
-    const res = await signAndExecute.mutateAsync({
-      transaction: tx,
-      options: { showEffects: true, showObjectChanges: true },
-    });
+    const res = await signAndExecute.mutateAsync({ transaction: tx });
 
     return res;
   }, [signAndExecute]);

@@ -33,7 +33,7 @@ export function useRecordView() {
 
     const res = await signAndExecute.mutateAsync({
       transaction: tx,
-      options: { showEffects: true },
+      // options: { showEffects: true },
     });
 
     return res;

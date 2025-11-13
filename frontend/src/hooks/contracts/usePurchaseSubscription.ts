@@ -51,10 +51,7 @@ export function usePurchaseSubscription() {
 
     tx.setGasBudget(30_000_000);
 
-    const res = await signAndExecute.mutateAsync({
-      transaction: tx,
-      options: { showEffects: true, showObjectChanges: true },
-    });
+    const res = await signAndExecute.mutateAsync({ transaction: tx });
 
     return res;
   }, [signAndExecute]);
