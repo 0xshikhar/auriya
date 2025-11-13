@@ -9,6 +9,7 @@ import WalrusUploader from '@/components/walrus/WalrusUploader';
 import { useCreatePost } from '@/hooks/contracts/useCreatePost';
 import { useCreateContentRegistry } from '@/hooks/contracts/useCreateContentRegistry';
 import { DEFAULT_CONTENT_REGISTRY_ID } from '@/lib/constants';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 export default function NewContentPage() {
   const [registryId, setRegistryId] = useState<string>(DEFAULT_CONTENT_REGISTRY_ID);
@@ -56,14 +57,17 @@ export default function NewContentPage() {
   };
 
   return (
-    <div className="container py-8 max-w-3xl">
-      <h1 className="text-2xl font-bold mb-4">Create Content</h1>
+    <div className="container py-8 max-w-4xl">
+      <div className="mb-6">
+        <h1 className="text-3xl font-semibold tracking-tight">Create Content</h1>
+        <p className="text-sm text-muted-foreground mt-1">Upload media to Walrus and publish a gated post for your subscribers.</p>
+      </div>
       <Card>
         <CardHeader>
           <CardTitle>New Post</CardTitle>
         </CardHeader>
         <CardContent>
-          <form onSubmit={onSubmit} className="space-y-4">
+          <form onSubmit={onSubmit} className="space-y-6">
             <div className="space-y-2">
               <Label>Content Registry ID</Label>
               <div className="flex gap-2">
@@ -81,16 +85,17 @@ export default function NewContentPage() {
               </div>
               <div className="space-y-2">
                 <Label>Required Tier</Label>
-                <select
-                  className="h-10 rounded-md bg-transparent border border-white/10 px-3 text-sm"
-                  value={requiredTier}
-                  onChange={(e) => setRequiredTier(parseInt(e.target.value, 10) as any)}
-                >
-                  <option value={0}>Public</option>
-                  <option value={1}>Bronze</option>
-                  <option value={2}>Silver</option>
-                  <option value={3}>Gold</option>
-                </select>
+                <Select value={String(requiredTier)} onValueChange={(v) => setRequiredTier(parseInt(v, 10) as any)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select tier" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="0">Public</SelectItem>
+                    <SelectItem value="1">Bronze</SelectItem>
+                    <SelectItem value="2">Silver</SelectItem>
+                    <SelectItem value="3">Gold</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
 
@@ -102,17 +107,18 @@ export default function NewContentPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <Label>Content Type</Label>
-                <select
-                  className="h-10 rounded-md bg-transparent border border-white/10 px-3 text-sm"
-                  value={contentType}
-                  onChange={(e) => setContentType(parseInt(e.target.value, 10) as any)}
-                >
-                  <option value={0}>Text</option>
-                  <option value={1}>Image</option>
-                  <option value={2}>Video</option>
-                  <option value={3}>Audio</option>
-                  <option value={4}>File</option>
-                </select>
+                <Select value={String(contentType)} onValueChange={(v) => setContentType(parseInt(v, 10) as any)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="0">Text</SelectItem>
+                    <SelectItem value="1">Image</SelectItem>
+                    <SelectItem value="2">Video</SelectItem>
+                    <SelectItem value="3">Audio</SelectItem>
+                    <SelectItem value="4">File</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
 
               <WalrusUploader label="Upload media to Walrus" onUploaded={(r) => setBlobId(r.blobId)} />
