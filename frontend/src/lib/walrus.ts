@@ -14,7 +14,8 @@ export interface WalrusErrorResponse {
 }
 
 export function getWalrusUrl(blobId: string): string {
-  return `${WALRUS_AGGREGATOR}/v1/${blobId}`;
+  // Aggregator serves blobs at /v1/blobs/{blob_id}
+  return `${WALRUS_AGGREGATOR}/v1/blobs/${blobId}`;
 }
 
 export function isValidBlobId(blobId: string): boolean {
@@ -29,8 +30,11 @@ export async function uploadToWalrus(
   return new Promise<WalrusUploadResult>((resolve, reject) => {
     try {
       const xhr = new XMLHttpRequest();
-      const url = `${WALRUS_PUBLISHER}/v1/store?epochs=${WALRUS_DEFAULT_EPOCHS}`;
+      // Publisher API: PUT /v1/blobs?epochs=<n>
+      const url = `${WALRUS_PUBLISHER}/v1/blobs?epochs=${WALRUS_DEFAULT_EPOCHS}`;
       xhr.open('PUT', url, true);
+      // Walrus expects raw octet-stream
+      xhr.setRequestHeader('Content-Type', 'application/octet-stream');
 
       xhr.upload.onprogress = (evt) => {
         if (!onProgress) return;
@@ -56,7 +60,11 @@ export async function uploadToWalrus(
             return;
           }
 
-          const blobId = json?.newlyCreated?.blobObject?.blobId || json?.alreadyCertified?.blobId;
+          // Handle both newly created and already certified shapes per OpenAPI
+          const blobId =
+            json?.newlyCreated?.blob_object?.blobId ||
+            json?.newlyCreated?.blobObject?.blobId || // backward/case fallback
+            json?.alreadyCertified?.blob_id;
           if (!blobId) {
             reject(new Error('No blobId returned from Walrus'));
             return;
