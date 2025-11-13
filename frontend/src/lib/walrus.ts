@@ -94,3 +94,4 @@ export async function downloadFromWalrus(blobId: string): Promise<Blob> {
   if (!resp.ok) throw new Error(`Walrus download failed: ${resp.status} ${resp.statusText}`);
   return resp.blob();
 }
+
