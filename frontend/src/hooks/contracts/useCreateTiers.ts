@@ -4,6 +4,7 @@ import { useCallback } from 'react';
 import { Transaction } from '@mysten/sui/transactions';
 import { useSignAndExecuteTransaction } from '@mysten/dapp-kit';
 import { SUBSCRIPTION_PACKAGE_ID } from '@/lib/constants';
+import { createSuiClient } from '@/lib/sui';
 
 export type TierInput = {
   name: string;
@@ -41,12 +42,17 @@ export function useCreateTiers() {
 
     tx.setGasBudget(20_000_000);
 
-    const res = await signAndExecute.mutateAsync({
-      transaction: tx,
-      options: { showEffects: true, showObjectChanges: true },
-    });
+    const res = await signAndExecute.mutateAsync({ transaction: tx });
 
-    return res;
+    // Enrich with objectChanges for caller convenience
+    const client = createSuiClient();
+    const digest = (res as any)?.digest as string | undefined;
+    let objectChanges: any[] | undefined;
+    if (digest) {
+      const txInfo = await client.getTransactionBlock({ digest, options: { showObjectChanges: true } });
+      objectChanges = (txInfo as any)?.objectChanges as any[] | undefined;
+    }
+    return { ...(res as any), objectChanges } as any;
   }, [signAndExecute]);
 
   return { createTiers, isPending: signAndExecute.isPending } as const;

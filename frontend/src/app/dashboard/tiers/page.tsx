@@ -28,7 +28,7 @@ export default function TiersPage() {
     setResultId(null);
     try {
       const res = await createTiers(tiers);
-      const created = (res?.objectChanges as any[] | undefined)?.find(
+      const created = ((res as any)?.objectChanges as any[] | undefined)?.find(
         (c) => c.type === 'created' && typeof c.objectType === 'string' && c.objectType.endsWith('::subscription::CreatorSubscriptions')
       );
       setResultId(created?.objectId || null);
