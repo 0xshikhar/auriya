@@ -69,6 +69,24 @@ export default function NavbarApp() {
         </div>
 
         <div
+          className={style.headerItem}
+          onClick={() => {
+            router.push("/dashboard");
+          }}
+        >
+          Dashboard
+        </div>
+
+        <div
+          className={style.headerItem}
+          onClick={() => {
+            router.push("/creators");
+          }}
+        >
+          Creators
+        </div>
+
+        <div
           className={style.headerIcon}
           onClick={() => {
             router.push("/nft");
