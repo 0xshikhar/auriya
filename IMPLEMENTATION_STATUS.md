@@ -86,11 +86,11 @@
 ## 🚧 In Progress (Next Steps)
 
 ### Smart Contract Deployment
-- [ ] Build all contracts (verify no compilation errors)
-- [ ] Run test suite (verify all tests pass)
-- [ ] Deploy to Sui testnet
-- [ ] Verify on Sui Explorer
-- [ ] Update frontend .env with package IDs
+- [x] Build all contracts (verify no compilation errors)
+- [x] Run test suite (verify all tests pass)
+- [x] Deploy to Sui testnet
+- [] Verify on Sui Explorer
+- [] Update frontend .env with package IDs
 
 ### Frontend Integration
 - [ ] Create Walrus client (`/frontend/src/lib/walrus.ts`)
@@ -107,27 +107,28 @@
 ## 📋 To Do (Days 4-8)
 
 ### Phase 4: Walrus Integration (Days 4-5)
-- [ ] Install Walrus dependencies
-- [ ] Implement upload function with progress tracking
-- [ ] Implement download/streaming function
-- [ ] Create `WalrusUploader` component
+- [x] Implement upload function with progress tracking (`/frontend/src/lib/walrus.ts`)
+- [x] Implement download/streaming function (`/frontend/src/lib/walrus.ts`)
+- [x] Create `WalrusUploader` component (`/frontend/src/components/walrus/WalrusUploader.tsx`)
+- [x] Configure CSP and Next Image for Walrus (`/frontend/next.config.js`)
 - [ ] Test with images, videos, and large files
 
 ### Phase 5: Frontend Pages (Days 5-6)
-- [ ] **Creator Dashboard** (`/dashboard`)
-  - [ ] Profile setup page
-  - [ ] Tier configuration page
-  - [ ] Content creation page
-  - [ ] Analytics view
-- [ ] **Fan Portal** (`/creators`)
-  - [ ] Creator discovery page
-  - [ ] Creator profile page
-  - [ ] Subscription purchase modal
-  - [ ] Content feed
-- [ ] **Content Viewer** (`/creators/[handle]/posts/[id]`)
-  - [ ] Access gate component
-  - [ ] Walrus content display
-  - [ ] Like/comment functionality
+- [x] **Creator Dashboard** (`/dashboard`)
+  - [x] Profile setup page (`/dashboard/setup`)
+  - [x] Tier configuration page (`/dashboard/tiers`)
+  - [x] Content creation page (`/dashboard/content/new`)
+  - [x] Analytics view (`/dashboard/analytics`)
+- [x] **Fan Portal** (`/creators`)
+  - [x] Creator discovery page (`/creators`)
+  - [x] Creator profile page (`/creators/[address]`)
+  - [x] Subscription purchase modal (component: `PurchaseModal`)
+  - [x] Content feed (`/creators/[address]/posts`)
+- [x] **Content Viewer** (`/creators/[address]/posts/[id]`)
+  - [x] Access gate component (`AccessGate`)
+  - [x] Walrus content display (image/video/audio/file)
+  - [x] Like functionality
+  - [ ] Comment functionality
 
 ### Phase 6: Polish (Day 7)
 - [ ] Add loading skeletons
