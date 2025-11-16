@@ -41,16 +41,16 @@ export default function ProfileSetupPage() {
   };
 
   return (
-    <div className="container py-8 max-w-4xl">
-      <div className="mb-6">
-        <h1 className="text-3xl font-semibold tracking-tight">Profile Setup</h1>
-        <p className="text-sm text-muted-foreground mt-1">Create your public creator profile. Media is stored on Walrus for verifiable permanence.</p>
-      </div>
-      <Card>
-        <CardHeader>
-          <CardTitle>Create your creator profile</CardTitle>
-        </CardHeader>
-        <CardContent>
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-4xl mx-auto px-6 py-8">
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold text-black">Profile Setup</h1>
+          <p className="text-gray-600 mt-2">Create your public creator profile. Media is stored on Walrus for verifiable permanence.</p>
+        </div>
+
+        <div className="bg-white border border-gray-200 rounded-xl p-8">
+          <h2 className="text-2xl font-bold text-black mb-6">Create your creator profile</h2>
+          
           <form onSubmit={onSubmit} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
@@ -62,17 +62,18 @@ export default function ProfileSetupPage() {
                 <Input value={category} onChange={(e) => setCategory(e.target.value)} placeholder="Art / Music / Writing" required />
               </div>
             </div>
+
             <div className="space-y-2">
               <Label>Bio</Label>
               <Textarea value={bio} onChange={(e) => setBio(e.target.value)} placeholder="Short intro about you..." rows={4} required />
-              <p className="text-xs text-muted-foreground">Keep it concise. You can edit this later.</p>
+              <p className="text-xs text-gray-500">Keep it concise. You can edit this later.</p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <WalrusUploader label="Avatar" accept="image/*" maxSizeMB={10} onUploaded={(r) => setAvatarId(r.blobId)} />
                 {avatarId && (
-                  <div className="relative h-24 w-24 overflow-hidden rounded-full border">
+                  <div className="relative h-24 w-24 overflow-hidden rounded-full border-2 border-gumroad-pink">
                     <Image src={getWalrusUrl(avatarId)} alt="Avatar preview" fill sizes="96px" className="object-cover" />
                   </div>
                 )}
@@ -80,26 +81,33 @@ export default function ProfileSetupPage() {
               <div className="space-y-2">
                 <WalrusUploader label="Banner" accept="image/*" maxSizeMB={20} onUploaded={(r) => setBannerId(r.blobId)} />
                 {bannerId && (
-                  <div className="relative h-28 w-full overflow-hidden rounded-md border">
+                  <div className="relative h-28 w-full overflow-hidden rounded-lg border border-gray-200">
                     <Image src={getWalrusUrl(bannerId)} alt="Banner preview" fill sizes="100vw" className="object-cover" />
                   </div>
                 )}
               </div>
             </div>
 
-            <div className="flex justify-end gap-2 pt-2">
+            <div className="flex justify-end gap-2 pt-4">
               <Button type="submit" disabled={isPending || !avatarId || !bannerId}>
                 {isPending ? 'Creating…' : 'Create Profile'}
               </Button>
             </div>
 
             {txDigest && (
-              <div className="text-xs text-green-400 break-all">Submitted tx: {txDigest}</div>
+              <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                <p className="text-sm font-medium text-green-800">Success!</p>
+                <p className="text-xs text-green-600 mt-1 break-all">Transaction: {txDigest}</p>
+              </div>
             )}
-            {error && <div className="text-xs text-red-400">{error}</div>}
+            {error && (
+              <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+                <p className="text-sm text-red-600">{error}</p>
+              </div>
+            )}
           </form>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }

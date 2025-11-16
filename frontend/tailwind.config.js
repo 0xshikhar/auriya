@@ -11,12 +11,34 @@ module.exports = {
   ],
   theme: {
   	extend: {
+  		fontFamily: {
+  			sans: ['Mabry Pro', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', 'sans-serif'],
+  		},
   		borderRadius: {
   			lg: 'var(--radius)',
   			md: 'calc(var(--radius) - 2px)',
   			sm: 'calc(var(--radius) - 4px)'
   		},
   		colors: {
+  			gumroad: {
+  				pink: '#FF90E8',
+  				'pink-light': '#FFB3F0',
+  				'pink-dark': '#FF6FDE',
+  				black: '#000000',
+  				white: '#FFFFFF',
+  				gray: {
+  					50: '#FAFAFA',
+  					100: '#F5F5F5',
+  					200: '#E5E5E5',
+  					300: '#D4D4D4',
+  					400: '#A3A3A3',
+  					500: '#737373',
+  					600: '#525252',
+  					700: '#404040',
+  					800: '#262626',
+  					900: '#171717',
+  				}
+  			},
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
   			card: {
@@ -70,5 +92,5 @@ module.exports = {
   		}
   	}
   },
-  plugins: [require("daisyui"), require("tailwindcss-animate")],
+  plugins: [require("tailwindcss-animate")],
 }

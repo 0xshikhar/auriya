@@ -44,12 +44,15 @@ export function useCreateTiers() {
 
     const res = await signAndExecute.mutateAsync({ transaction: tx });
 
-    // Enrich with objectChanges for caller convenience
+    // Ensure the transaction is finalized before querying object changes
     const client = createSuiClient();
     const digest = (res as any)?.digest as string | undefined;
     let objectChanges: any[] | undefined;
     if (digest) {
-      const txInfo = await client.getTransactionBlock({ digest, options: { showObjectChanges: true } });
+      const txInfo = await client.waitForTransaction({
+        digest,
+        options: { showObjectChanges: true, showEffects: true, showEvents: true },
+      });
       objectChanges = (txInfo as any)?.objectChanges as any[] | undefined;
     }
     return { ...(res as any), objectChanges } as any;

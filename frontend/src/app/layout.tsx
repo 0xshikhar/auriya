@@ -2,11 +2,13 @@ import type { Metadata } from "next";
 import "@/styles/globals.css";
 import "@mysten/dapp-kit/dist/index.css";
 import { Providers } from "./providers";
-import Navbar from "@/components/navigation/navbarapp";
+import NavbarGate from "@/components/navigation/navbar-gate";
+import { Toaster } from "@/components/ui/sonner"
+
 
 export const metadata: Metadata = {
-  title: "Create Sui Template",
-  description: "App Router base layout",
+  title: "Auriya – Sell your work, get paid",
+  description: "Go from 0 to $1. Anyone can earn their first dollar online. Just start with what you know, see what sticks, and get paid.",
 };
 
 export default function RootLayout({
@@ -18,8 +20,9 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body>
         <Providers>
-          <Navbar />
+          <NavbarGate />
           {children}
+          <Toaster />
         </Providers>
       </body>
     </html>
