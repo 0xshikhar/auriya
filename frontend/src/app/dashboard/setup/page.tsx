@@ -9,10 +9,14 @@ import { useCreateProfile } from '@/hooks/contracts/useCreateProfile';
 import { Textarea } from '@/components/ui/textarea';
 import Image from 'next/image';
 import { getWalrusUrl } from '@/lib/walrus';
-import { User, Image as ImageIcon, FileText, CheckCircle2, AlertCircle } from 'lucide-react';
+import { User, Image as ImageIcon, FileText, CheckCircle2, AlertCircle, Wallet } from 'lucide-react';
+import { useCurrentAccount } from '@mysten/dapp-kit';
+import { useZkLogin } from '@/hooks/useZkLogin';
 
 export default function ProfileSetupPage() {
   const { createProfile, isPending } = useCreateProfile();
+  const currentAccount = useCurrentAccount();
+  const { session: zkLoginSession } = useZkLogin();
   const [displayName, setDisplayName] = useState('');
   const [bio, setBio] = useState('');
   const [category, setCategory] = useState('Art');
@@ -20,6 +24,10 @@ export default function ProfileSetupPage() {
   const [bannerId, setBannerId] = useState<string>('');
   const [txDigest, setTxDigest] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  // Check if only zkLogin is connected (wallet is required for transactions)
+  const hasWallet = !!currentAccount;
+  const hasOnlyZkLogin = !hasWallet && !!zkLoginSession;
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -75,6 +83,35 @@ export default function ProfileSetupPage() {
 
         <div className="bg-white border-2 border-gray-200 rounded-2xl p-10 shadow-sm">{/* Form content */}
           
+          {/* Wallet connection warning */}
+          {hasOnlyZkLogin && (
+            <div className="mb-6 p-6 bg-amber-50 border-2 border-amber-200 rounded-xl flex items-start gap-3">
+              <AlertCircle className="w-6 h-6 text-amber-600 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="text-lg font-semibold text-amber-900 mb-1">Sui Wallet Required</p>
+                <p className="text-sm text-amber-700 mb-3">
+                  Profile creation requires a Sui wallet connection to sign transactions. 
+                  zkLogin authentication alone is not sufficient at this time.
+                </p>
+                <p className="text-sm text-amber-700">
+                  Please connect your Sui wallet using the wallet button in the navigation bar to continue.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {!hasWallet && !zkLoginSession && (
+            <div className="mb-6 p-6 bg-red-50 border-2 border-red-200 rounded-xl flex items-start gap-3">
+              <Wallet className="w-6 h-6 text-red-600 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="text-lg font-semibold text-red-800 mb-1">No Wallet Connected</p>
+                <p className="text-sm text-red-600">
+                  Please connect your Sui wallet or sign in with zkLogin to create a profile.
+                </p>
+              </div>
+            </div>
+          )}
+          
           <form onSubmit={onSubmit} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
@@ -125,10 +162,10 @@ export default function ProfileSetupPage() {
             <div className="flex justify-end gap-4 pt-8 border-t border-gray-200">
               <Button 
                 type="submit" 
-                disabled={isPending || !avatarId || !bannerId}
+                disabled={isPending || !avatarId || !bannerId || !hasWallet}
                 className="bg-black hover:bg-gray-800 text-white px-8 py-3 rounded-full font-semibold text-lg disabled:opacity-50"
               >
-                {isPending ? 'Creating Profile...' : 'Create Profile'}
+                {isPending ? 'Creating Profile...' : hasWallet ? 'Create Profile' : 'Connect Wallet to Continue'}
               </Button>
             </div>
 
