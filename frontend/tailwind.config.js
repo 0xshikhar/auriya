@@ -21,7 +21,7 @@ module.exports = {
   		},
   		colors: {
   			gumroad: {
-  				pink: '#FF90E8',
+  				pink: '#98f0e5',
   				'pink-light': '#FFB3F0',
   				'pink-dark': '#FF6FDE',
   				black: '#000000',
