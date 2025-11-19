@@ -31,7 +31,7 @@ text-gray-500     // #737373 - Tertiary text
 <button className="px-8 py-3 bg-black text-white hover:bg-gray-800 rounded-lg transition font-medium">
   Start selling
 </button>
-```
+```  q
 
 ### Secondary Button (Outline)
 ```tsx
