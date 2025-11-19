@@ -10,6 +10,9 @@ import { Button } from '@/components/ui/button';
 import { useRecordView } from '@/hooks/contracts/useRecordView';
 import { useLikePost } from '@/hooks/contracts/useLikePost';
 import Image from 'next/image';
+import CommentSection from '@/components/comments/CommentSection';
+import { Skeleton } from '@/components/ui/skeleton';
+import { toast } from 'sonner';
 
 export default function PostViewerPage() {
   const params = useParams<{ address: string; id: string }>();
@@ -21,7 +24,7 @@ export default function PostViewerPage() {
   const [error, setError] = React.useState<string | null>(null);
   const [post, setPost] = React.useState<any | null>(null);
 
-  const { recordView, isPending: viewPending } = useRecordView();
+  const { recordView } = useRecordView();
   const { like, isPending: likePending } = useLikePost();
 
   React.useEffect(() => {
@@ -33,7 +36,11 @@ export default function PostViewerPage() {
         const fields = await getContentPost(params.id);
         if (!cancelled) setPost(fields);
       } catch (e: any) {
-        if (!cancelled) setError(e?.message || 'Failed to load post');
+        if (!cancelled) {
+          const msg = e?.message || 'Failed to load post';
+          setError(msg);
+          toast.error(msg);
+        }
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -46,7 +53,20 @@ export default function PostViewerPage() {
     return () => { cancelled = true; };
   }, [params.id, registry, recordView]);
 
-  if (loading) return <div className="container py-8">Loading…</div>;
+  if (loading)
+    return (
+      <div className="container py-8 max-w-3xl">
+        <Card>
+          <CardHeader>
+            <Skeleton className="h-6 w-1/2" />
+          </CardHeader>
+          <CardContent>
+            <Skeleton className="h-4 w-2/3 mb-4" />
+            <Skeleton className="h-64 w-full" />
+          </CardContent>
+        </Card>
+      </div>
+    );
   if (error) return <div className="container py-8 text-red-400">{error}</div>;
   if (!post) return <div className="container py-8">Not found</div>;
 
@@ -96,10 +116,30 @@ export default function PostViewerPage() {
           </div>
 
           <div className="flex gap-3 pt-2">
-            <Button variant="outline" size="sm" onClick={() => registry && like(params.id, registry)} disabled={!registry || likePending}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={async () => {
+                if (!registry) return;
+                try {
+                  await like(params.id, registry);
+                  toast.success('Liked');
+                } catch (e: any) {
+                  toast.error(e?.message || 'Failed to like');
+                }
+              }}
+              disabled={!registry || likePending}
+            >
               {likePending ? 'Liking…' : 'Like'}
             </Button>
           </div>
+
+          {/* Comments */}
+          <CommentSection
+            postId={params.id}
+            creatorAddress={params.address}
+            requiredTier={post.required_tier}
+          />
         </CardContent>
       </Card>
     </div>
