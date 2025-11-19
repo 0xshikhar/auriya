@@ -2,10 +2,11 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import React, { useState } from "react";
+import React from "react";
 import { ConnectButton } from "@mysten/dapp-kit";
 import { startZkLogin } from "@/lib/enoki";
 import { useUnifiedAccount } from "@/hooks/useUnifiedAccount";
+import AddressName from "@/components/web3/AddressName";
 import { Star } from "lucide-react";
 
 export default function NavbarApp() {
@@ -59,7 +60,7 @@ export default function NavbarApp() {
             ) : (
               <div className="relative group">
                 <button className="px-4 py-2 bg-black text-white hover:bg-gray-800 rounded-lg transition font-medium flex items-center gap-2">
-                  {selected.address.slice(0, 6)}…{selected.address.slice(-4)}
+                  <AddressName address={selected.address} />
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
@@ -82,7 +83,7 @@ export default function NavbarApp() {
                             </svg>
                           )}
                         </div>
-                        <div className="font-mono text-sm text-black mt-1">{a.address.slice(0, 8)}…{a.address.slice(-6)}</div>
+                        <div className="font-mono text-sm text-black mt-1"><AddressName address={a.address} /></div>
                       </button>
                     ))}
                     
@@ -107,7 +108,9 @@ export default function NavbarApp() {
                         + Connect zkLogin
                       </button>
                     )}
-                    
+
+                    {/* show suins name if user wallet have it on testnet  */}
+                  
                     <div className="my-2 border-t border-gray-200" />
                     
                     <button
