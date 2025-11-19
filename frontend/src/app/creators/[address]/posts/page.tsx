@@ -4,6 +4,7 @@ import React from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { toast } from 'sonner';
 import { getRegistryPostIds, getContentPost } from '@/lib/content';
 
 export default function CreatorPostsPage() {
@@ -32,7 +33,11 @@ export default function CreatorPostsPage() {
         );
         if (!cancelled) setPosts(details);
       } catch (e: any) {
-        if (!cancelled) setError(e?.message || 'Failed to load posts');
+        if (!cancelled) {
+          const msg = e?.message || 'Failed to load posts';
+          setError(msg);
+          toast.error(msg);
+        }
       } finally {
         if (!cancelled) setLoading(false);
       }
