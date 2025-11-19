@@ -64,7 +64,7 @@ export default function ProductShowcase() {
                 className="bg-white rounded-2xl shadow-2xl border-8 border-gray-900 p-1 w-80 transition-shadow"
                 whileHover={{ scale: 1.02 }}
               >
-                <div className="bg-gradient-to-br from-teal-600 to-teal-700 rounded-lg p-4 h-64">
+                <div className="bg-gradient-to-br from-[#98f0e5] to-[#80ffdb] rounded-lg p-4 h-64">
                   <div className="flex gap-2 mb-3">
                     <motion.div 
                       className="w-3 h-3 bg-teal-400 rounded-full"
@@ -78,7 +78,7 @@ export default function ProductShowcase() {
                   </div>
                   <div className="bg-white rounded-lg p-3 mb-2">
                     <p className="text-xs font-semibold text-gray-800 mb-2">How to Play Ukelele</p>
-                    <div className="aspect-square bg-gradient-to-br from-pink-400 to-pink-600 rounded flex items-center justify-center hover:shadow-lg transition-shadow">
+                    <div className="aspect-square bg-[#ffa69e] rounded flex items-center justify-center hover:shadow-lg transition-shadow">
                       <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20"><path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" /></svg>
                     </div>
                   </div>
@@ -94,7 +94,7 @@ export default function ProductShowcase() {
                 animate={{ y: [0, 8, 0] }}
                 transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
               >
-                <div className="bg-teal-600 rounded-lg p-2 h-32">
+                <div className="bg-[#98f0e5] rounded-lg p-2 h-32">
                   <div className="bg-white rounded p-2 mb-1">
                     <p className="text-xs font-semibold text-gray-800">How to Play Ukelele</p>
                     <p className="text-xs text-gray-600">Priyanka</p>

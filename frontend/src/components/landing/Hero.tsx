@@ -27,8 +27,8 @@ const FloatingLogo = ({ delay, size, position }: { delay: number; size: number; 
         >
           <defs>
             <linearGradient id={`grad-${delay}`} x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#ec4899" />
-              <stop offset="100%" stopColor="#db2777" />
+              <stop offset="0%" stopColor="#98f0e5" />
+              <stop offset="100%" stopColor="#80ffdb" />
             </linearGradient>
           </defs>
           <circle cx="100" cy="100" r="95" fill={`url(#grad-${delay})`} stroke="#000" strokeWidth="6" />
