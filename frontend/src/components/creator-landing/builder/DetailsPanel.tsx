@@ -8,6 +8,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { CreatorLandingPage } from '@/types/creator-landing';
 import { Upload, ChevronRight, Palette } from 'lucide-react';
 import Image from 'next/image';
+import WalrusUploader from '@/components/walrus/WalrusUploader';
+import { getWalrusUrl } from '@/lib/walrus';
 
 interface DetailsPanelProps {
   landingPage: CreatorLandingPage;
@@ -36,23 +38,6 @@ export default function DetailsPanel({ landingPage, onUpdate }: DetailsPanelProp
     setExpandedSections((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
-  const handleProfilePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    // TODO: Upload to Walrus
-    console.log('Upload profile photo:', file);
-    // const walrusId = await uploadToWalrus(file);
-    // onUpdate({ header: { ...landingPage.header, profilePhotoWalrusId: walrusId } });
-  };
-
-  const handleCoverPhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    // TODO: Upload to Walrus
-    console.log('Upload cover photo:', file);
-  };
 
   const predefinedColors = [
     '#1a1a1a', '#2d2d2d', '#3c3f44', '#5c5c5c', '#7c7c7c',
@@ -112,34 +97,29 @@ export default function DetailsPanel({ landingPage, onUpdate }: DetailsPanelProp
           />
         </button>
         {expandedSections.profilePhoto && (
-          <div className="px-4 pb-4 border-t">
-            <div className="pt-3 space-y-3">
-              {landingPage.header.profilePhotoWalrusId && (
-                <div className="w-24 h-24 rounded-lg overflow-hidden bg-muted">
-                  {/* TODO: Display Walrus image */}
-                  <div className="w-full h-full flex items-center justify-center text-muted-foreground">
-                    Photo
-                  </div>
-                </div>
-              )}
-              <div>
-                <label htmlFor="profile-photo-upload">
-                  <Button variant="outline" size="sm" className="cursor-pointer" asChild>
-                    <span>
-                      <Upload className="h-4 w-4 mr-2" />
-                      Upload photo
-                    </span>
-                  </Button>
-                </label>
-                <input
-                  id="profile-photo-upload"
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={handleProfilePhotoUpload}
+          <div className="px-4 pb-4 border-t pt-3 space-y-3">
+            <WalrusUploader
+              label=""
+              accept="image/*"
+              maxSizeMB={10}
+              onUploaded={(result) =>
+                onUpdate({
+                  header: { ...landingPage.header, profilePhotoWalrusId: result.blobId },
+                })
+              }
+              defaultBlobId={landingPage.header.profilePhotoWalrusId}
+            />
+            {landingPage.header.profilePhotoWalrusId && (
+              <div className="w-24 h-24 rounded-full overflow-hidden border-2">
+                <Image
+                  src={getWalrusUrl(landingPage.header.profilePhotoWalrusId)}
+                  alt="Profile"
+                  width={96}
+                  height={96}
+                  className="object-cover"
                 />
               </div>
-            </div>
+            )}
           </div>
         )}
       </div>
@@ -270,24 +250,28 @@ export default function DetailsPanel({ landingPage, onUpdate }: DetailsPanelProp
           />
         </button>
         {expandedSections.coverPhoto && (
-          <div className="px-4 pb-4 border-t pt-3">
-            <div>
-              <label htmlFor="cover-photo-upload">
-                <Button variant="outline" size="sm" className="cursor-pointer" asChild>
-                  <span>
-                    <Upload className="h-4 w-4 mr-2" />
-                    Upload photo
-                  </span>
-                </Button>
-              </label>
-              <input
-                id="cover-photo-upload"
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={handleCoverPhotoUpload}
-              />
-            </div>
+          <div className="px-4 pb-4 border-t pt-3 space-y-3">
+            <WalrusUploader
+              label=""
+              accept="image/*"
+              maxSizeMB={20}
+              onUploaded={(result) =>
+                onUpdate({
+                  header: { ...landingPage.header, coverPhotoWalrusId: result.blobId },
+                })
+              }
+              defaultBlobId={landingPage.header.coverPhotoWalrusId}
+            />
+            {landingPage.header.coverPhotoWalrusId && (
+              <div className="relative h-32 w-full rounded-lg overflow-hidden border-2">
+                <Image
+                  src={getWalrusUrl(landingPage.header.coverPhotoWalrusId)}
+                  alt="Cover"
+                  fill
+                  className="object-cover"
+                />
+              </div>
+            )}
           </div>
         )}
       </div>
