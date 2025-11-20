@@ -35,3 +35,6 @@ export const CONTENT_PACKAGE_ID = '0xc5827f364c2c70096921cd7513abe7303d21c0afbea
 // Optional: if you pre-created a registry for development, put its ID here, else pass at call-site
 export const DEFAULT_CONTENT_REGISTRY_ID = '';
 
+// Landing Page Registry (will be created after deployment)
+export const LANDING_PAGE_REGISTRY_ID = '';
+
