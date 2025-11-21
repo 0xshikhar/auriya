@@ -2,6 +2,7 @@
 
 import { Search } from 'lucide-react'
 import { motion } from 'framer-motion'
+import Image from 'next/image'
 
 const FloatingLogo = ({ delay, size, position }: { delay: number; size: number; position: string }) => {
   return (
@@ -33,6 +34,8 @@ const FloatingLogo = ({ delay, size, position }: { delay: number; size: number; 
           </defs>
           <circle cx="100" cy="100" r="95" fill={`url(#grad-${delay})`} stroke="#000" strokeWidth="6" />
           <text x="100" y="120" fontSize="110" fontWeight="900" textAnchor="middle" fill="#000" fontFamily="system-ui">A</text>
+          {/* <Image src="/logo.png" alt="Auriya" width={35} height={35} />  */}
+      
         </motion.svg>
       </div>
     </motion.div>

@@ -8,6 +8,7 @@ import { startZkLogin } from "@/lib/enoki";
 import { useUnifiedAccount } from "@/hooks/useUnifiedAccount";
 import AddressName from "@/components/web3/AddressName";
 import { Star } from "lucide-react";
+import Image from "next/image";
 
 export default function NavbarApp() {
   const router = useRouter();
@@ -19,8 +20,8 @@ export default function NavbarApp() {
         <div className="flex items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition">
-            <div className="w-8 h-8 bg-gumroad-pink rounded-full flex items-center justify-center">
-              <span className="text-black font-bold text-xl">A</span>
+            <div className="w-8 h-8 bg-gumroad-pink rounded-full flex items-center justify-center p-0.5">
+              <Image src="/logo.png" alt="Auriya" width={35} height={35} />
             </div>
             <span className="text-xl font-bold text-black">Auriya</span>
             {/* <div className="flex items-center gap-1 ml-2 px-2 py-1 bg-black rounded-full">
@@ -48,7 +49,7 @@ export default function NavbarApp() {
               <>
                 <button
                   onClick={() => startZkLogin('google')}
-                  className="px-4 py-2 text-black hover:bg-gray-100 rounded-lg transition font-medium"
+                  className="px-4 py-2 text-black bg-gumroad-pink hover:bg-gumroad-pink/80 rounded-lg transition font-medium"
                 >
                   Log in
                 </button>
