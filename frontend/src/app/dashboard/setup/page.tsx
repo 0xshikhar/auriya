@@ -6,17 +6,25 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import WalrusUploader from '@/components/walrus/WalrusUploader';
 import { useCreateProfile } from '@/hooks/contracts/useCreateProfile';
+import { useCreatorProfile } from '@/hooks/contracts/useCreatorProfile';
 import { Textarea } from '@/components/ui/textarea';
 import Image from 'next/image';
 import { getWalrusUrl } from '@/lib/walrus';
-import { User, Image as ImageIcon, FileText, CheckCircle2, AlertCircle, Wallet } from 'lucide-react';
+import { User, Image as ImageIcon, FileText, CheckCircle2, AlertCircle, Wallet, ArrowLeft } from 'lucide-react';
 import { useCurrentAccount } from '@mysten/dapp-kit';
 import { useZkLogin } from '@/hooks/useZkLogin';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 export default function ProfileSetupPage() {
   const { createProfile, isPending } = useCreateProfile();
   const currentAccount = useCurrentAccount();
   const { session: zkLoginSession } = useZkLogin();
+  const router = useRouter();
+  
+  // Check if user already has a profile
+  const { profile, hasProfile, isLoading: profileLoading } = useCreatorProfile(currentAccount?.address);
+  
   const [displayName, setDisplayName] = useState('');
   const [bio, setBio] = useState('');
   const [category, setCategory] = useState('Art');
@@ -29,10 +37,27 @@ export default function ProfileSetupPage() {
   const hasWallet = !!currentAccount;
   const hasOnlyZkLogin = !hasWallet && !!zkLoginSession;
 
+  // Pre-fill form if profile exists (edit mode)
+  React.useEffect(() => {
+    if (profile) {
+      setDisplayName(profile.displayName);
+      setBio(profile.bio);
+      setCategory(profile.category);
+      setAvatarId(profile.avatarWalrusId);
+      setBannerId(profile.bannerWalrusId);
+    }
+  }, [profile]);
+
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setTxDigest(null);
+    
+    if (hasProfile) {
+      setError('You already have a profile. Profile updates coming soon!');
+      return;
+    }
+    
     try {
       const res = await createProfile({
         displayName,
@@ -43,19 +68,68 @@ export default function ProfileSetupPage() {
       });
       // @ts-ignore
       setTxDigest(res?.digest || null);
+      
+      // Redirect to landing page after successful creation
+      setTimeout(() => {
+        router.push('/dashboard/landing');
+      }, 2000);
     } catch (err: any) {
       setError(err?.message || 'Failed to create profile');
     }
   };
 
+  // Show loading state while checking for existing profile
+  if (profileLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gumroad-pink mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading profile...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-5xl mx-auto px-6 py-12">
+        {/* Back button */}
+        <Link href="/dashboard" className="inline-flex items-center gap-2 text-gray-600 hover:text-black mb-6 transition">
+          <ArrowLeft className="w-4 h-4" />
+          Back to Dashboard
+        </Link>
+        
         {/* Header */}
         <div className="mb-12">
-          <h1 className="text-5xl font-bold text-black mb-4">Create Your Profile</h1>
-          <p className="text-xl text-gray-600">Set up your onchain creator identity. All media stored permanently on Walrus.</p>
+          <h1 className="text-5xl font-bold text-black mb-4">
+            {hasProfile ? 'Your Profile' : 'Create Your Profile'}
+          </h1>
+          <p className="text-xl text-gray-600">
+            {hasProfile 
+              ? 'Your onchain creator identity. Profile editing coming soon!' 
+              : 'Set up your onchain creator identity. All media stored permanently on Walrus.'}
+          </p>
         </div>
+        
+        {/* Profile exists notification */}
+        {hasProfile && (
+          <div className="mb-8 p-6 bg-blue-50 border-2 border-blue-200 rounded-xl flex items-start gap-3">
+            <CheckCircle2 className="w-6 h-6 text-blue-600 flex-shrink-0 mt-0.5" />
+            <div className="flex-1">
+              <p className="text-lg font-semibold text-blue-900 mb-1">Profile Already Created</p>
+              <p className="text-sm text-blue-700 mb-3">
+                You created your profile on {new Date(profile!.createdAt).toLocaleDateString()}. 
+                Profile editing functionality is coming soon.
+              </p>
+              <Link 
+                href="/dashboard/landing" 
+                className="inline-flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition text-sm font-medium"
+              >
+                Customize Your Landing Page →
+              </Link>
+            </div>
+          </div>
+        )}
 
         {/* Progress indicators */}
         <div className="flex items-center justify-center gap-4 mb-12">
@@ -162,10 +236,10 @@ export default function ProfileSetupPage() {
             <div className="flex justify-end gap-4 pt-8 border-t border-gray-200">
               <Button 
                 type="submit" 
-                disabled={isPending || !avatarId || !bannerId || !hasWallet}
+                disabled={isPending || !avatarId || !bannerId || !hasWallet || hasProfile}
                 className="bg-black hover:bg-gray-800 text-white px-8 py-3 rounded-full font-semibold text-lg disabled:opacity-50"
               >
-                {isPending ? 'Creating Profile...' : hasWallet ? 'Create Profile' : 'Connect Wallet to Continue'}
+                {isPending ? 'Creating Profile...' : hasProfile ? 'Profile Already Created' : hasWallet ? 'Create Profile' : 'Connect Wallet to Continue'}
               </Button>
             </div>
 
@@ -174,7 +248,8 @@ export default function ProfileSetupPage() {
                 <CheckCircle2 className="w-6 h-6 text-gumroad-pink flex-shrink-0 mt-0.5" />
                 <div>
                   <p className="text-lg font-semibold text-black mb-1">Profile Created Successfully!</p>
-                  <p className="text-sm text-gray-600 break-all">Transaction: {txDigest}</p>
+                  <p className="text-sm text-gray-600 break-all mb-2">Transaction: {txDigest}</p>
+                  <p className="text-sm text-gray-600">Redirecting to landing page customization...</p>
                 </div>
               </div>
             )}
