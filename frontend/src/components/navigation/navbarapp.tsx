@@ -22,11 +22,11 @@ export default function NavbarApp() {
             <div className="w-8 h-8 bg-gumroad-pink rounded-full flex items-center justify-center">
               <span className="text-black font-bold text-xl">A</span>
             </div>
-            <span className="text-xl font-bold text-black">auriya</span>
-            <div className="flex items-center gap-1 ml-2 px-2 py-1 bg-black rounded-full">
+            <span className="text-xl font-bold text-black">Auriya</span>
+            {/* <div className="flex items-center gap-1 ml-2 px-2 py-1 bg-black rounded-full">
               <Star className="w-3 h-3 text-white fill-white" />
               <span className="text-xs text-white font-medium">7.6K</span>
-            </div>
+            </div> */}
           </Link>
 
           {/* Navigation Links */}
