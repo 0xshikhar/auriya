@@ -3,6 +3,8 @@
 import { CreatorLandingPage } from '@/types/creator-landing';
 import { Button } from '@/components/ui/button';
 import { LatestPostSection, RecentPostsSection, AboutSection, TiersSection } from '../sections';
+import Image from 'next/image';
+import { getWalrusUrl } from '@/lib/walrus';
 
 interface LivePreviewProps {
   landingPage: CreatorLandingPage;
@@ -32,23 +34,41 @@ export default function LivePreview({ landingPage }: LivePreviewProps) {
         }}
       >
         {/* Cover Photo Area */}
-        <div className="h-32 md:h-48" />
+        <div className="h-32 md:h-48 relative overflow-hidden">
+          {header.coverPhotoWalrusId ? (
+            <Image
+              src={getWalrusUrl(header.coverPhotoWalrusId)}
+              alt="Cover photo"
+              fill
+              className="object-cover"
+              sizes="100vw"
+            />
+          ) : (
+            <div className="w-full h-full" style={{ backgroundColor: theme.accentColor }} />
+          )}
+        </div>
 
         {/* Profile Section */}
         <div className="px-6 pb-6">
           <div className="flex flex-col md:flex-row items-start md:items-end gap-4 -mt-16">
             {/* Profile Photo */}
             <div
-              className="w-32 h-32 rounded-full border-4 flex-shrink-0"
+              className="w-32 h-32 rounded-full border-4 flex-shrink-0 overflow-hidden relative"
               style={{
                 borderColor: theme.backgroundColor,
                 backgroundColor: theme.primaryColor,
               }}
             >
               {header.profilePhotoWalrusId ? (
-                <div className="w-full h-full rounded-full bg-muted" />
+                <Image
+                  src={getWalrusUrl(header.profilePhotoWalrusId)}
+                  alt="Profile photo"
+                  fill
+                  className="object-cover"
+                  sizes="128px"
+                />
               ) : (
-                <div className="w-full h-full rounded-full flex items-center justify-center text-4xl font-bold">
+                <div className="w-full h-full flex items-center justify-center text-4xl font-bold">
                   {header.displayName?.[0] || '?'}
                 </div>
               )}
