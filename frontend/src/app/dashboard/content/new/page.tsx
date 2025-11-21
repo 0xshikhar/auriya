@@ -32,13 +32,24 @@ export default function NewContentPage() {
   const { createRegistry, isPending: creatingRegistry } = useCreateContentRegistry();
   const { linkRegistry, isPending: linkingRegistry } = useLinkContentRegistry();
 
+  // Load from localStorage first (most recent registry)
+  useEffect(() => {
+    if (!registryId) {
+      const last = typeof window !== 'undefined' ? localStorage.getItem('auriya:lastRegistryId') : null;
+      if (last) {
+        setRegistryId(last);
+        toast.info('Loaded registry from last publish');
+      }
+    }
+  }, [registryId]);
+
   // Load registry from profile if available
   useEffect(() => {
     if (profile?.contentRegistryId && !registryId) {
       setRegistryId(profile.contentRegistryId);
       toast.info('Loaded registry from your profile');
     }
-  }, [profile?.contentRegistryId]);
+  }, [profile?.contentRegistryId, registryId]);
 
   // Allow empty registryId (we will auto-create one on submit)
   const canSubmit = useMemo(() => !!blobId && !!title, [blobId, title]);
@@ -87,6 +98,17 @@ export default function NewContentPage() {
         throw new Error('Invalid registry ID format. Must be a valid Sui object ID.');
       }
       
+      // If using an existing registry and profile not yet linked, link BEFORE publish
+      if (profile?.objectId && !profile?.contentRegistryId && !isNewRegistry) {
+        try {
+          toast.info('Linking registry to your profile...');
+          await linkRegistry(profile.objectId, targetRegistry);
+          toast.success('Registry linked to profile');
+        } catch (linkError: any) {
+          console.warn('Pre-publish link failed; will continue', linkError);
+        }
+      }
+
       toast.info('Publishing post...');
       const res = await createPost({
         registryId: targetRegistry,
@@ -101,6 +123,25 @@ export default function NewContentPage() {
       const digest = res?.digest || null;
       setTxDigest(digest);
       toast.success('Post published successfully!');
+
+      // Persist the last used/created registry for the content page fallback
+      try {
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('auriya:lastRegistryId', targetRegistry);
+        }
+      } catch {}
+
+      // Auto-link registry to profile if not already linked (for existing registries too)
+      if (profile?.objectId && !profile?.contentRegistryId && !isNewRegistry) {
+        try {
+          toast.info('Linking registry to your profile...');
+          await linkRegistry(profile.objectId, targetRegistry);
+          toast.success('Registry linked to profile!');
+        } catch (linkError: any) {
+          console.warn('Failed to link registry to profile:', linkError);
+          toast.warning('Post created but registry linking failed. You can link it manually from the content page.');
+        }
+      }
       
       // Reset form
       setTitle('');
