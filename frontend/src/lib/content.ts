@@ -33,14 +33,36 @@ export async function getContentPost(objectId: string) {
 }
 
 export async function getRegistryPostIds(registryId: string): Promise<string[]> {
+  console.log('📋 [getRegistryPostIds] Fetching post IDs for registry:', registryId);
+  
   const client = createSuiClient();
-  const fields = await getObjectFields(client, registryId);
-  if (!fields) return [];
-  const ids = (fields.post_ids?.fields?.contents as any[]) || fields.post_ids || [];
-  // Support both vector<ID> representations
-  if (Array.isArray(ids)) {
-    if (ids.length && ids[0]?.fields?.id?.id) return ids.map((x) => x.fields.id.id as string);
-    if (typeof ids[0] === 'string') return ids as string[];
+  const res = await client.getObject({ 
+    id: registryId, 
+    options: { showContent: true, showType: true } 
+  });
+  
+  console.log('📦 [getRegistryPostIds] Registry object response:', JSON.stringify(res, null, 2));
+  
+  if (!res.data?.content || !('fields' in res.data.content)) {
+    console.warn('⚠️ [getRegistryPostIds] No fields found in registry');
+    return [];
   }
-  return [];
+  
+  const fields = res.data.content.fields as any;
+  console.log('🔍 [getRegistryPostIds] Registry fields:', JSON.stringify(fields, null, 2));
+  
+  // Handle vector<ID> format from Sui
+  const postIds = fields.post_ids || [];
+  console.log('📝 [getRegistryPostIds] Raw post_ids:', JSON.stringify(postIds, null, 2));
+  
+  if (!Array.isArray(postIds)) {
+    console.warn('⚠️ [getRegistryPostIds] post_ids is not an array:', typeof postIds);
+    return [];
+  }
+  
+  // Sui returns vector<ID> as array of strings
+  const ids = postIds.filter((id: any) => typeof id === 'string') as string[];
+  console.log('✅ [getRegistryPostIds] Extracted post IDs:', ids);
+  
+  return ids;
 }

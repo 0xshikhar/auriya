@@ -67,6 +67,14 @@ export function useCreatorProfile(address?: string) {
 
     const fields = content.fields;
     
+    // Helper to read Option<T> encoded by Sui as { fields: { vec: [value?] } } or sometimes { fields: { some: value } }
+    const readOption = (opt: any): any | undefined => {
+      if (!opt || !opt.fields) return undefined;
+      if (Array.isArray(opt.fields.vec)) return opt.fields.vec[0];
+      if (Object.prototype.hasOwnProperty.call(opt.fields, 'some')) return opt.fields.some;
+      return undefined;
+    };
+
     setProfileObjectId(objectId || null);
     setProfile({
       objectId: objectId || '',
@@ -76,12 +84,12 @@ export function useCreatorProfile(address?: string) {
       avatarWalrusId: fields.avatar_walrus_id || '',
       bannerWalrusId: fields.banner_walrus_id || '',
       category: fields.category || '',
-      contentRegistryId: fields.content_registry_id?.fields?.some || undefined,
+      contentRegistryId: readOption(fields.content_registry_id),
       totalSubscribers: parseInt(fields.total_subscribers || '0'),
       totalRevenueMist: parseInt(fields.total_revenue_mist || '0'),
       createdAt: parseInt(fields.created_at || '0'),
       verified: fields.verified || false,
-      suinsName: fields.suins_name?.fields?.some || undefined,
+      suinsName: readOption(fields.suins_name),
       socialLinks: fields.social_links || [],
     });
   }, [ownedObjects]);
