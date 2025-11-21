@@ -35,6 +35,8 @@ export const CONTENT_PACKAGE_ID = '0xc5827f364c2c70096921cd7513abe7303d21c0afbea
 // Optional: if you pre-created a registry for development, put its ID here, else pass at call-site
 export const DEFAULT_CONTENT_REGISTRY_ID = '';
 
-// Landing Page Registry (will be created after deployment)
-export const LANDING_PAGE_REGISTRY_ID = '';
+// Landing Page Registry 
+export const LANDING_PAGE_REGISTRY_ID = '0x969895fbb879c153a48fafd248c81b47137c972f58b1f252ca4ce79df8bd09b7';
 
+// export const CREATOR_PROFILE_PACKAGE_ID = '0xcf6951be2aeafa1cfd6f176519f15ed4e1b806bf026a904cccfc3085d5270a5c';
+// export const CREATOR_PROFILE_REGISTRY_ID = '0x5837f654433430864318e0f8ca82fabcdc772a35331cf8a74f80685003df049f';
