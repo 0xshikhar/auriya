@@ -6,11 +6,15 @@ import { CreatorLandingPage } from '@/types/creator-landing';
 import { useCurrentAccount } from '@mysten/dapp-kit';
 import { toast } from 'sonner';
 import { useCreateLandingPage, useUpdateLandingPage, usePublishLandingPage, useLandingPageByCreator } from '@/hooks/contracts/useLandingPage';
+import { useCreatorProfile } from '@/hooks/contracts/useCreatorProfile';
 import { cacheLandingPage, getCachedLandingPage } from '@/lib/landing-storage';
+import Link from 'next/link';
+import { AlertCircle } from 'lucide-react';
 
 export default function LandingPageBuilderPage() {
   const account = useCurrentAccount();
   const { landingPage: existingPage, isLoading } = useLandingPageByCreator(account?.address);
+  const { profile, profileObjectId, hasProfile, isLoading: profileLoading } = useCreatorProfile(account?.address);
   const { createLandingPage, isPending: isCreating } = useCreateLandingPage();
   const { updateLandingPage, isPending: isUpdating } = useUpdateLandingPage();
   const { publishLandingPage, isPending: isPublishing } = usePublishLandingPage();
@@ -18,7 +22,7 @@ export default function LandingPageBuilderPage() {
   const [configObjectId, setConfigObjectId] = useState<string | null>(null);
   const [initialData, setInitialData] = useState<Partial<CreatorLandingPage> | undefined>();
 
-  // Load existing landing page or cached data
+  // Load existing landing page or cached data, and pre-populate from profile
   useEffect(() => {
     if (existingPage) {
       setInitialData(existingPage);
@@ -26,9 +30,40 @@ export default function LandingPageBuilderPage() {
       const cached = getCachedLandingPage(account.address);
       if (cached) {
         setInitialData(cached);
+      } else if (profile) {
+        // Pre-populate landing page with profile data
+        setInitialData({
+          id: '',
+          creatorAddress: account.address,
+          header: {
+            pageName: profile.displayName,
+            displayName: profile.displayName,
+            tagline: profile.bio,
+            profilePhotoWalrusId: profile.avatarWalrusId,
+            coverPhotoWalrusId: profile.bannerWalrusId,
+            showJoinButton: true,
+            joinButtonText: 'Join for free',
+          },
+          theme: {
+            primaryColor: '#FF90E8',
+            accentColor: '#3c3f44',
+            backgroundColor: '#1a1a1a',
+            textColor: '#ffffff',
+            fontFamily: 'Inter',
+            useProfilePhotoColor: false,
+          },
+          sections: [],
+          socialLinks: {},
+          customKeywords: [profile.category],
+          visibility: 'public',
+          isPublished: false,
+          showMembershipEarnings: false,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        } as Partial<CreatorLandingPage>);
       }
     }
-  }, [existingPage, account?.address]);
+  }, [existingPage, account?.address, profile]);
 
   const handleSave = async (data: CreatorLandingPage) => {
     if (!account?.address) {
@@ -50,10 +85,12 @@ export default function LandingPageBuilderPage() {
         toast.success('Landing page updated!', { id: 'upload' });
       } else {
         // Create new landing page
-        // TODO: Get creator profile ID from user's profile
-        const creatorProfileId = '0x...'; // Replace with actual profile ID
+        if (!profileObjectId) {
+          toast.error('Please create your profile first at /dashboard/setup');
+          return;
+        }
         
-        const result = await createLandingPage(creatorProfileId, data, (progress) => {
+        const result = await createLandingPage(profileObjectId, data, (progress) => {
           if (progress < 100) {
             toast.loading(`Uploading to Walrus... ${progress}%`, { id: 'upload' });
           }
@@ -120,13 +157,65 @@ export default function LandingPageBuilderPage() {
     );
   }
 
+  // Show loading state
+  if (profileLoading || isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gumroad-pink mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading your data...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Require profile to be created first
+  if (!hasProfile) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="max-w-md mx-auto text-center p-8">
+          <div className="mb-6 p-6 bg-amber-50 border-2 border-amber-200 rounded-xl">
+            <AlertCircle className="w-12 h-12 text-amber-600 mx-auto mb-4" />
+            <h1 className="text-2xl font-bold mb-2">Profile Required</h1>
+            <p className="text-gray-600 mb-6">
+              You need to create your creator profile before customizing your landing page.
+              Your profile provides the basic information (name, bio, images) that will be used on your landing page.
+            </p>
+            <Link 
+              href="/dashboard/setup"
+              className="inline-block bg-black text-white px-6 py-3 rounded-full hover:bg-gray-800 transition font-semibold"
+            >
+              Create Profile First →
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <PageBuilder
-      creatorAddress={account.address}
-      initialData={initialData}
-      onSave={handleSave}
-      onPublish={handlePublish}
-      onBack={() => window.history.back()}
-    />
+    <div>
+      {!existingPage && profile && (
+        <div className="bg-blue-50 border-b-2 border-blue-200 p-4">
+          <div className="max-w-7xl mx-auto flex items-start gap-3">
+            <AlertCircle className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+            <div className="flex-1">
+              <p className="text-sm text-blue-900">
+                <strong>Welcome!</strong> We&apos;ve pre-filled your landing page with your profile information. 
+                Customize the sections, theme, and content below, then click <strong>Save</strong> to store on Walrus.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      <PageBuilder
+        creatorAddress={account.address}
+        initialData={initialData}
+        onSave={handleSave}
+        onPublish={handlePublish}
+        onBack={() => window.history.back()}
+      />
+    </div>
   );
 }
