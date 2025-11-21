@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { CreatorLandingPage, DEFAULT_SECTIONS, DEFAULT_THEME, DEFAULT_HEADER } from '@/types/creator-landing';
 import { Eye, Settings, Layout, ChevronLeft } from 'lucide-react';
@@ -46,6 +46,28 @@ export default function PageBuilder({
   const [activePanel, setActivePanel] = useState<ActivePanel>('layout');
   const [saving, setSaving] = useState(false);
   const [previewMode, setPreviewMode] = useState(false);
+
+  // Update landing page when initialData changes (e.g., when profile loads)
+  useEffect(() => {
+    if (initialData && Object.keys(initialData).length > 0) {
+      setLandingPage({
+        id: initialData?.id || '',
+        creatorAddress,
+        header: initialData?.header || DEFAULT_HEADER,
+        theme: initialData?.theme || DEFAULT_THEME,
+        sections: initialData?.sections || DEFAULT_SECTIONS,
+        about: initialData?.about || '',
+        socialLinks: initialData?.socialLinks || {},
+        customKeywords: initialData?.customKeywords || [],
+        visibility: initialData?.visibility || 'public',
+        isPublished: initialData?.isPublished || false,
+        showMembershipEarnings: initialData?.showMembershipEarnings ?? true,
+        createdAt: initialData?.createdAt || new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        ...initialData,
+      });
+    }
+  }, [initialData, creatorAddress]);
 
   const updateLandingPage = (updates: Partial<CreatorLandingPage>) => {
     setLandingPage((prev) => ({
