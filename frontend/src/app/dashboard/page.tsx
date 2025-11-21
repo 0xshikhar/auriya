@@ -2,11 +2,13 @@
 
 import Link from 'next/link';
 import { useCurrentAccount } from '@mysten/dapp-kit';
-import { BarChart3, FileText, Settings, TrendingUp, Users, DollarSign, Wallet } from 'lucide-react';
+import { BarChart3, FileText, Settings, TrendingUp, Users, DollarSign, Wallet, CheckCircle2, Sparkles } from 'lucide-react';
 import { startZkLogin } from '@/lib/enoki';
+import { useCreatorProfile } from '@/hooks/contracts/useCreatorProfile';
 
 export default function DashboardPage() {
   const account = useCurrentAccount();
+  const { profile, hasProfile, isLoading: profileLoading } = useCreatorProfile(account?.address);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -72,46 +74,111 @@ export default function DashboardPage() {
 
         {/* Quick Actions */}
         <div className="mb-8">
-          <h2 className="text-2xl font-bold text-black mb-4">Quick Actions</h2>
+          <h2 className="text-2xl font-bold text-black mb-4">
+            {hasProfile ? 'Manage Your Creator Hub' : 'Get Started'}
+          </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <Link href="/dashboard/setup" className="group">
-              <div className="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-lg transition">
-                <div className="w-12 h-12 bg-gumroad-pink rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition">
-                  <Settings className="w-6 h-6 text-black" />
+              <div className={`bg-white border-2 rounded-xl p-6 hover:shadow-lg transition ${
+                hasProfile ? 'border-green-200 bg-green-50' : 'border-gray-200'
+              }`}>
+                <div className="flex items-center justify-between mb-4">
+                  <div className={`w-12 h-12 rounded-lg flex items-center justify-center group-hover:scale-110 transition ${
+                    hasProfile ? 'bg-green-500' : 'bg-gumroad-pink'
+                  }`}>
+                    {hasProfile ? <CheckCircle2 className="w-6 h-6 text-white" /> : <Settings className="w-6 h-6 text-black" />}
+                  </div>
+                  {hasProfile && (
+                    <span className="text-xs font-semibold text-green-700 bg-green-100 px-2 py-1 rounded-full">
+                      COMPLETED
+                    </span>
+                  )}
                 </div>
                 <h3 className="text-xl font-bold text-black mb-2">Creator Profile</h3>
-                <p className="text-gray-600 mb-4">Set up your onchain profile with Walrus-stored avatar and banner.</p>
+                <p className="text-gray-600 mb-4">
+                  {hasProfile 
+                    ? `Profile created as "${profile?.displayName}". View your onchain identity.`
+                    : 'Set up your onchain profile with Walrus-stored avatar and banner.'}
+                </p>
                 <span className="text-black font-medium group-hover:text-gumroad-pink transition">
-                  Create profile →
+                  {hasProfile ? 'View profile →' : 'Create profile →'}
+                </span>
+              </div>
+            </Link>
+            
+            <Link href="/dashboard/landing" className="group">
+              <div className={`bg-white border-2 rounded-xl p-6 hover:shadow-lg transition ${
+                hasProfile ? 'border-gray-200' : 'border-gray-200 opacity-60 pointer-events-none'
+              }`}>
+                <div className="w-12 h-12 bg-gumroad-pink rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition">
+                  <Sparkles className="w-6 h-6 text-black" />
+                </div>
+                <h3 className="text-xl font-bold text-black mb-2">Landing Page</h3>
+                <p className="text-gray-600 mb-4">
+                  {hasProfile
+                    ? 'Customize your public creator page with sections, themes, and content.'
+                    : 'Create your profile first to unlock landing page customization.'}
+                </p>
+                <span className="text-black font-medium group-hover:text-gumroad-pink transition">
+                  {hasProfile ? 'Customize page →' : 'Locked - Create profile first'}
                 </span>
               </div>
             </Link>
 
             <Link href="/dashboard/tiers" className="group">
-              <div className="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-lg transition">
+              <div className={`bg-white border border-gray-200 rounded-xl p-6 hover:shadow-lg transition ${
+                hasProfile ? '' : 'opacity-60 pointer-events-none'
+              }`}>
                 <div className="w-12 h-12 bg-gumroad-pink rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition">
                   <DollarSign className="w-6 h-6 text-black" />
                 </div>
                 <h3 className="text-xl font-bold text-black mb-2">NFT Tiers</h3>
-                <p className="text-gray-600 mb-4">Configure Bronze/Silver/Gold subscription NFTs with pricing in SUI.</p>
+                <p className="text-gray-600 mb-4">
+                  {hasProfile
+                    ? 'Configure Bronze/Silver/Gold subscription NFTs with pricing in SUI.'
+                    : 'Create your profile first to set up membership tiers.'}
+                </p>
                 <span className="text-black font-medium group-hover:text-gumroad-pink transition">
-                  Set up tiers →
+                  {hasProfile ? 'Set up tiers →' : 'Locked'}
                 </span>
               </div>
             </Link>
-
+          </div>
+        </div>
+        
+        {/* Secondary Actions */}
+        <div className="mb-8">
+          <h2 className="text-2xl font-bold text-black mb-4">Content & Engagement</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Link href="/dashboard/content/new" className="group">
-              <div className="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-lg transition">
+              <div className={`bg-white border border-gray-200 rounded-xl p-6 hover:shadow-lg transition ${
+                hasProfile ? '' : 'opacity-60 pointer-events-none'
+              }`}>
                 <div className="w-12 h-12 bg-gumroad-pink rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition">
                   <FileText className="w-6 h-6 text-black" />
                 </div>
                 <h3 className="text-xl font-bold text-black mb-2">Post Content</h3>
-                <p className="text-gray-600 mb-4">Upload to Walrus, set tier access, publish gated content.</p>
+                <p className="text-gray-600 mb-4">
+                  {hasProfile
+                    ? 'Upload to Walrus, set tier access, publish gated content.'
+                    : 'Create your profile first to start posting content.'}
+                </p>
                 <span className="text-black font-medium group-hover:text-gumroad-pink transition">
-                  Create post →
+                  {hasProfile ? 'Create post →' : 'Locked'}
                 </span>
               </div>
             </Link>
+            
+            <div className="bg-white border border-gray-200 rounded-xl p-6 opacity-60">
+              <div className="w-12 h-12 bg-gray-300 rounded-lg flex items-center justify-center mb-4">
+                <Users className="w-6 h-6 text-gray-500" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-500 mb-2">Analytics</h3>
+              <p className="text-gray-400 mb-4">Track your subscribers, revenue, and engagement metrics.</p>
+              <span className="text-gray-400 font-medium">
+                Coming soon
+              </span>
+            </div>
           </div>
         </div>
 
