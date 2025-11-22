@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { LatestPostSection, RecentPostsSection, AboutSection, TiersSection } from '../sections';
 import Image from 'next/image';
 import { getWalrusUrl } from '@/lib/walrus';
+import { useRouter } from 'next/navigation';
 
 interface LivePreviewProps {
   landingPage: CreatorLandingPage;
@@ -87,14 +88,6 @@ export default function LivePreview({ landingPage }: LivePreviewProps) {
               </div>
 
               <div className="flex gap-2">
-                <Button
-                  style={{
-                    backgroundColor: theme.backgroundColor,
-                    color: theme.textColor,
-                  }}
-                >
-                  Home
-                </Button>
                 <Button variant="outline">Membership</Button>
                 {header.showJoinButton && (
                   <Button
