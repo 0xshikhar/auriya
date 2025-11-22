@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useCurrentAccount } from '@mysten/dapp-kit';
+import { useCurrentAccount, useWallets } from '@mysten/dapp-kit';
+import { isEnokiWallet } from '@mysten/enoki';
 import { useZkLogin } from '@/hooks/useZkLogin';
 
 
@@ -15,15 +16,22 @@ const SELECTED_KEY = 'unified_account_selected';
 
 export function useUnifiedAccount() {
   const wallet = useCurrentAccount();
+  const wallets = useWallets();
   const { session, logout: logoutZk } = useZkLogin();
   const [selected, setSelected] = useState<AccountSource | null>(null);
 
   const accounts = useMemo<UnifiedAccountItem[]>(() => {
     const list: UnifiedAccountItem[] = [];
-    if (wallet?.address) list.push({ type: 'wallet', address: wallet.address, label: 'Wallet' });
+    if (wallet?.address) {
+      // If the connected account belongs to an Enoki wallet, label it as zkLogin
+      const isZkLoginWallet = wallets.filter(isEnokiWallet).some((w) =>
+        w.accounts?.some((a) => a.address === wallet.address)
+      );
+      list.push({ type: 'wallet', address: wallet.address, label: isZkLoginWallet ? 'zkLogin' : 'Wallet' });
+    }
     if (session?.address) list.push({ type: 'zklogin', address: session.address, label: 'zkLogin' });
     return list;
-  }, [wallet?.address, session?.address]);
+  }, [wallet?.address, session?.address, wallets]);
 
   // Initialize selection
   useEffect(() => {

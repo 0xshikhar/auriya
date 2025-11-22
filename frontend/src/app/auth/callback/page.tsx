@@ -35,14 +35,28 @@ function CallbackInner() {
 
       try {
         const data = await completeZkLogin(code, state as any);
-        localStorage.setItem('zklogin_session', JSON.stringify(data));
         
-        // Trigger storage event for same-window updates
+        // Store session data
+        localStorage.setItem('zklogin_session', JSON.stringify(data));
+        // Prefer zklogin in unified account by default
+        localStorage.setItem('unified_account_selected', 'zklogin');
+        
+        // Trigger storage events so hooks update in the same tab
         window.dispatchEvent(new StorageEvent('storage', {
           key: 'zklogin_session',
           newValue: JSON.stringify(data),
           storageArea: localStorage
         }));
+        window.dispatchEvent(new StorageEvent('storage', {
+          key: 'unified_account_selected',
+          newValue: 'zklogin',
+          storageArea: localStorage
+        }));
+        
+        console.log('[Callback] zkLogin session stored:', {
+          address: data.address,
+          provider: data.provider
+        });
         
         setStatus('success');
         setTimeout(() => router.push('/dashboard'), 1200);
