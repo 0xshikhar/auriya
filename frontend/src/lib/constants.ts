@@ -42,7 +42,7 @@ export const CREATOR_PROFILE_PACKAGE_ID = '0x1ba3dac9157e597bfaf27e94f6f2fa513bd
 export const CREATOR_PROFILE_REGISTRY_ID = '0xe6b3363c91fb1883c49bace782b25dbefdb3c5158fb1dfe878507a6833cf7d5c';
 
 // Seal Access Control Package (deploy seal_access Move package and update this)
-export const SEAL_ACCESS_CONTROL_PACKAGE_ID = '0x0000000000000000000000000000000000000000000000000000000000000000'; // TODO: Deploy and update
+export const SEAL_ACCESS_CONTROL_PACKAGE_ID = '0x1435b35c3d5bfb75224a5394ea47cf4054c84277e63aa7a2f1bc2188cf6b814a';
 
 // Verified Seal Key Servers (Mysten Labs Testnet - Open Mode)
 export const SEAL_KEY_SERVERS = [
