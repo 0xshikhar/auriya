@@ -7,6 +7,7 @@ import { useCurrentAccount } from '@mysten/dapp-kit';
 import { useSearchParams } from 'next/navigation';
 import { useCreatorProfile } from '@/hooks/contracts/useCreatorProfile';
 import { useCreatorContent } from '@/hooks/contracts/useCreatorContent';
+import { DecryptedContentCard } from '@/components/content/DecryptedContentCard';
 import { getWalrusUrl } from '@/lib/walrus';
 import { FileText, Plus, Image as ImageIcon, Video, Music, File, Lock, Eye, Heart, Calendar, AlertCircle, MoreVertical } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -46,10 +47,10 @@ function ContentPageInner() {
   const [manualRegistry, setManualRegistry] = useState<string>('');
   const [effectiveRegistry, setEffectiveRegistry] = useState<string | undefined>(undefined);
 
-  // Compute effective registry: profile -> query -> localStorage
+  // Compute effective registry: query -> profile -> localStorage
   useEffect(() => {
     const last = typeof window !== 'undefined' ? localStorage.getItem('auriya:lastRegistryId') || undefined : undefined;
-    const next = profile?.contentRegistryId || queryRegistry || last;
+    const next = queryRegistry || profile?.contentRegistryId || last;
     setEffectiveRegistry(next);
     if (!profile?.contentRegistryId && (queryRegistry || last)) {
       toast.message('Using registry from recent publish', {
@@ -157,7 +158,7 @@ function ContentPageInner() {
         </div>
 
           {/* Registry Resolver */}
-        {/* <div className="mb-6">
+        <div className="mb-6">
           <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 flex flex-col md:flex-row gap-3 items-start md:items-center justify-between">
             <div className="text-sm text-yellow-900">
               <div className="font-semibold">Registry</div>
@@ -183,17 +184,28 @@ function ContentPageInner() {
                 onChange={(e) => setManualRegistry(e.target.value.trim())}
               />
               <Button
-                className="bg-white text-black border border-gray-300 hover:bg-gray-50"
+                className="bg-black text-white hover:bg-gray-800"
                 onClick={() => {
                   if (!manualRegistry.startsWith('0x')) {
-                    toast.error('Invalid registry id');
+                    toast.error('Invalid registry id - must start with 0x');
                     return;
                   }
                   setEffectiveRegistry(manualRegistry);
-                  try { localStorage.setItem('auriya:lastRegistryId', manualRegistry); } catch {}
+                  try { 
+                    localStorage.setItem('auriya:lastRegistryId', manualRegistry);
+                    toast.success('Registry loaded! Fetching posts...');
+                  } catch {}
                 }}
               >
                 Load
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  window.location.reload();
+                }}
+              >
+                Refresh
               </Button>
               {hasProfile && effectiveRegistry && !profile?.contentRegistryId && (
                 <Button
@@ -219,7 +231,7 @@ function ContentPageInner() {
               )}
             </div>
           </div>
-        </div> */}
+        </div>
 
         {/* Content List */}
         <div className="bg-gray-50 rounded-xl overflow-hidden">
@@ -258,13 +270,16 @@ function ContentPageInner() {
           {!isLoading && !error && postCount > 0 && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
               {posts.map((post) => {
-                const walrusBlobId = post.fields?.walrus_blob_id || '';
-                const contentType = post.fields?.content_type || 0;
-                const isImage = contentType === 1;
-                const isVideo = contentType === 2;
-                const walrusUrl = walrusBlobId ? getWalrusUrl(walrusBlobId) : null;
+                  const walrusBlobId = post.fields?.walrus_blob_id || '';
+                  const contentType = post.fields?.content_type || 0;
+                  const isImage = contentType === 1;
+                  const isVideo = contentType === 2;
+                  const walrusUrl = walrusBlobId ? getWalrusUrl(walrusBlobId) : null;
+                  const hasEncryption = !!post.fields?.encryption_metadata;
 
-                return (
+                return hasEncryption ? (
+                  <DecryptedContentCard key={post.id} post={post} />
+                ) : (
                   <div key={post.id} className="bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-lg transition-shadow">
                     {/* Post Header - User Info */}
                     <div className="flex items-center justify-between p-4 border-b border-gray-100">

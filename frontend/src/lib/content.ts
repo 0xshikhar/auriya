@@ -37,35 +37,43 @@ export async function getContentPost(objectId: string) {
 
 export async function getRegistryPostIds(registryId: string): Promise<string[]> {
   console.log('📋 [getRegistryPostIds] Fetching post IDs for registry:', registryId);
-  
   const client = createSuiClient();
-  const res = await client.getObject({ 
-    id: registryId, 
-    options: { showContent: true, showType: true } 
-  });
-  
-  console.log('📦 [getRegistryPostIds] Registry object response:', JSON.stringify(res, null, 2));
-  
-  if (!res.data?.content || !('fields' in res.data.content)) {
-    console.warn('⚠️ [getRegistryPostIds] No fields found in registry');
-    return [];
+
+  const fetchOnce = async () => {
+    const res = await client.getObject({ id: registryId, options: { showContent: true, showType: true } });
+    console.log('📦 [getRegistryPostIds] Registry object response:', JSON.stringify(res, null, 2));
+    if (!res.data?.content || !('fields' in res.data.content)) {
+      console.warn('⚠️ [getRegistryPostIds] No fields found in registry');
+      return { ids: [] as string[], count: 0 };
+    }
+    const fields = res.data.content.fields as any;
+    console.log('🔍 [getRegistryPostIds] Registry fields:', JSON.stringify(fields, null, 2));
+    const postIds = fields.post_ids || [];
+    const postCount = Number(fields.post_count || 0);
+    console.log('📝 [getRegistryPostIds] Raw post_ids:', JSON.stringify(postIds, null, 2));
+    if (!Array.isArray(postIds)) {
+      console.warn('⚠️ [getRegistryPostIds] post_ids is not an array:', typeof postIds);
+      return { ids: [] as string[], count: postCount };
+    }
+    const ids = postIds.filter((id: any) => typeof id === 'string') as string[];
+    console.log('✅ [getRegistryPostIds] Extracted post IDs:', ids);
+    return { ids, count: postCount };
+  };
+
+  // Poll briefly if ids are lagging behind the on-chain post_count (indexing delay)
+  let attempts = 5;
+  let lastIds: string[] = [];
+  while (attempts-- > 0) {
+    const { ids, count } = await fetchOnce();
+    lastIds = ids;
+    if (count <= ids.length || attempts === 0) {
+      if (count > ids.length) {
+        console.log(`⏱️ [getRegistryPostIds] Returning ids after retries (count=${count}, ids=${ids.length})`);
+      }
+      return ids;
+    }
+    console.log(`⏳ [getRegistryPostIds] post_ids (${ids.length}) < post_count (${count}), retrying...`);
+    await new Promise((r) => setTimeout(r, 1200));
   }
-  
-  const fields = res.data.content.fields as any;
-  console.log('🔍 [getRegistryPostIds] Registry fields:', JSON.stringify(fields, null, 2));
-  
-  // Handle vector<ID> format from Sui
-  const postIds = fields.post_ids || [];
-  console.log('📝 [getRegistryPostIds] Raw post_ids:', JSON.stringify(postIds, null, 2));
-  
-  if (!Array.isArray(postIds)) {
-    console.warn('⚠️ [getRegistryPostIds] post_ids is not an array:', typeof postIds);
-    return [];
-  }
-  
-  // Sui returns vector<ID> as array of strings
-  const ids = postIds.filter((id: any) => typeof id === 'string') as string[];
-  console.log('✅ [getRegistryPostIds] Extracted post IDs:', ids);
-  
-  return ids;
+  return lastIds;
 }
