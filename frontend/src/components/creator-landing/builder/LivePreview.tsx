@@ -13,10 +13,21 @@ interface LivePreviewProps {
 
 export default function LivePreview({ landingPage }: LivePreviewProps) {
   const { header, theme, sections } = landingPage;
+  const router = useRouter();
 
   const enabledSections = sections
     .filter((section) => section.enabled)
     .sort((a, b) => a.order - b.order);
+
+  const handleMembershipClick = () => {
+    // Navigate to creator's membership/tiers page
+    router.push(`/c/${landingPage.creatorAddress}#tiers`);
+  };
+
+  const handleJoinClick = () => {
+    // Navigate to subscription flow
+    router.push(`/c/${landingPage.creatorAddress}/subscribe`);
+  };
 
   return (
     <div
@@ -88,13 +99,20 @@ export default function LivePreview({ landingPage }: LivePreviewProps) {
               </div>
 
               <div className="flex gap-2">
-                <Button variant="outline">Membership</Button>
+                    <Button 
+                  variant="outline"
+                  onClick={handleMembershipClick}
+                >
+                  Membership
+                </Button>
                 {header.showJoinButton && (
                   <Button
+                    onClick={handleJoinClick}
                     style={{
-                      backgroundColor: theme.backgroundColor,
-                      color: theme.textColor,
+                      backgroundColor: theme.primaryColor,
+                      color: '#000',
                     }}
+                    className="font-semibold"
                   >
                     {header.joinButtonText || 'Join for free'}
                   </Button>
