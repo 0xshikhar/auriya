@@ -11,13 +11,17 @@ import { useLinkContentRegistry } from '@/hooks/contracts/useLinkContentRegistry
 import { useCreatorProfile } from '@/hooks/contracts/useCreatorProfile';
 import { DEFAULT_CONTENT_REGISTRY_ID } from '@/lib/constants';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { FileText, Image as ImageIcon, Video, Music, File, Lock, CheckCircle2, AlertCircle, Upload } from 'lucide-react';
+import { FileText, Image as ImageIcon, Video, Music, File as FileIcon, Lock, CheckCircle2, AlertCircle, Upload, Shield } from 'lucide-react';
 import { toast } from 'sonner';
+import { useRouter } from 'next/navigation';
 import { useCurrentAccount } from '@mysten/dapp-kit';
+import { encryptContent } from '@/lib/seal';
+import { uploadToWalrus } from '@/lib/walrus';
 
 export default function NewContentPage() {
   const currentAccount = useCurrentAccount();
   const { profile } = useCreatorProfile(currentAccount?.address);
+  const router = useRouter();
   
   const [registryId, setRegistryId] = useState<string>(DEFAULT_CONTENT_REGISTRY_ID);
   const [title, setTitle] = useState('');
@@ -27,6 +31,13 @@ export default function NewContentPage() {
   const [blobId, setBlobId] = useState<string>('');
   const [txDigest, setTxDigest] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  
+  // Seal encryption state
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [isEncrypting, setIsEncrypting] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [encryptionMetadata, setEncryptionMetadata] = useState<string | null>(null);
+  const [useEncryption, setUseEncryption] = useState(true); // Enable encryption by default for gated content
 
   const { createPost, isPending } = useCreatePost();
   const { createRegistry, isPending: creatingRegistry } = useCreateContentRegistry();
@@ -53,6 +64,85 @@ export default function NewContentPage() {
 
   // Allow empty registryId (we will auto-create one on submit)
   const canSubmit = useMemo(() => !!blobId && !!title, [blobId, title]);
+  
+  // Handle file encryption and upload to Walrus
+  const handleEncryptAndUpload = async (file: File) => {
+    if (!currentAccount?.address) {
+      toast.error('Please connect your wallet first');
+      return;
+    }
+    
+    console.log('📤 [ContentCreation] Starting encrypt and upload process...');
+    setSelectedFile(file);
+    setIsEncrypting(true);
+    setIsUploading(true);
+    
+    try {
+      let finalBlobId: string;
+      let metadata: string | null = null;
+      
+      // Check if encryption should be used (for gated content)
+      if (useEncryption && requiredTier > 0) {
+        console.log('🔐 [ContentCreation] Encrypting content with Seal...');
+        toast.info('🔐 Encrypting content with Mysten Seal...');
+        
+        // Encrypt content
+        const { encryptedData, encryptionMetadata } = await encryptContent(
+          file,
+          requiredTier,
+          currentAccount.address
+        );
+        
+        setIsEncrypting(false);
+        console.log('✅ [ContentCreation] Encryption complete');
+        toast.success('✅ Content encrypted successfully!');
+        
+        // Upload encrypted data to Walrus
+        console.log('📤 [ContentCreation] Uploading encrypted content to Walrus...');
+        toast.info('📤 Uploading encrypted content to Walrus...');
+        
+        // Convert Uint8Array to regular array for Blob compatibility
+        const encryptedArray = Array.from(encryptedData);
+        const encryptedBlob = new Blob([new Uint8Array(encryptedArray)], { type: 'application/octet-stream' });
+        const encryptedFile = new File([encryptedBlob], file.name + '.encrypted', { type: 'application/octet-stream' });
+        
+        const walrusResult = await uploadToWalrus(encryptedFile, (progress) => {
+          console.log(`📊 [ContentCreation] Upload progress: ${progress}%`);
+        });
+        
+        finalBlobId = walrusResult.blobId;
+        metadata = JSON.stringify(encryptionMetadata);
+        
+        console.log('✅ [ContentCreation] Encrypted content uploaded to Walrus');
+        console.log('🆔 [ContentCreation] Blob ID:', finalBlobId);
+        toast.success('✅ Encrypted content uploaded to Walrus!');
+        
+      } else {
+        // Upload without encryption (public content)
+        console.log('📤 [ContentCreation] Uploading content without encryption...');
+        toast.info('📤 Uploading content to Walrus...');
+        
+        const walrusResult = await uploadToWalrus(file, (progress) => {
+          console.log(`📊 [ContentCreation] Upload progress: ${progress}%`);
+        });
+        
+        finalBlobId = walrusResult.blobId;
+        console.log('✅ [ContentCreation] Content uploaded to Walrus');
+        console.log('🆔 [ContentCreation] Blob ID:', finalBlobId);
+        toast.success('✅ Content uploaded to Walrus!');
+      }
+      
+      setBlobId(finalBlobId);
+      setEncryptionMetadata(metadata);
+      setIsUploading(false);
+      
+    } catch (error: any) {
+      console.error('❌ [ContentCreation] Encrypt and upload failed:', error);
+      setIsEncrypting(false);
+      setIsUploading(false);
+      toast.error(`Failed: ${error.message || 'Unknown error'}`);
+    }
+  };
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -109,7 +199,9 @@ export default function NewContentPage() {
         }
       }
 
+      console.log('📝 [ContentCreation] Publishing post to blockchain...');
       toast.info('Publishing post...');
+      
       const res = await createPost({
         registryId: targetRegistry,
         title,
@@ -117,7 +209,10 @@ export default function NewContentPage() {
         contentType,
         walrusBlobId: blobId,
         requiredTier,
+        encryptionMetadata: encryptionMetadata || '', // Include Seal metadata
       });
+      
+      console.log('✅ [ContentCreation] Post published successfully!');
       
       // @ts-ignore
       const digest = res?.digest || null;
@@ -131,10 +226,17 @@ export default function NewContentPage() {
         }
       } catch {}
 
+      // Navigate to dashboard with the exact registry so the new post appears immediately
+      // try {
+      //   router.push(`/dashboard/content?registry=${encodeURIComponent(targetRegistry)}`);
+      // } catch {}
+
       // Auto-link registry to profile if not already linked (for existing registries too)
       if (profile?.objectId && !profile?.contentRegistryId && !isNewRegistry) {
         try {
+          // Wait a bit for the previous transaction to finalize
           toast.info('Linking registry to your profile...');
+          await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds
           await linkRegistry(profile.objectId, targetRegistry);
           toast.success('Registry linked to profile!');
         } catch (linkError: any) {
@@ -173,7 +275,7 @@ export default function NewContentPage() {
     1: <ImageIcon className="w-5 h-5" />,
     2: <Video className="w-5 h-5" />,
     3: <Music className="w-5 h-5" />,
-    4: <File className="w-5 h-5" />,
+    4: <FileIcon className="w-5 h-5" />,
   };
 
   return (
@@ -265,14 +367,68 @@ export default function NewContentPage() {
 
               <div className="space-y-3">
                 <div className="flex items-center gap-2">
-                  <Upload className="w-5 h-5 text-gumroad-pink" />
-                  <Label className="text-lg font-semibold">Upload to Walrus</Label>
+                  {useEncryption && requiredTier > 0 ? (
+                    <Shield className="w-5 h-5 text-gumroad-pink" />
+                  ) : (
+                    <Upload className="w-5 h-5 text-gumroad-pink" />
+                  )}
+                  <Label className="text-lg font-semibold">
+                    {useEncryption && requiredTier > 0 ? 'Encrypt & Upload to Walrus' : 'Upload to Walrus'}
+                  </Label>
                 </div>
-                <WalrusUploader label="" onUploaded={(r) => setBlobId(r.blobId)} />
+                
+                {/* Custom file input with encryption */}
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 hover:border-gumroad-pink transition">
+                  <input
+                    type="file"
+                    id="file-upload"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) handleEncryptAndUpload(file);
+                    }}
+                    disabled={isEncrypting || isUploading}
+                  />
+                  <label
+                    htmlFor="file-upload"
+                    className="flex flex-col items-center justify-center cursor-pointer"
+                  >
+                    {isEncrypting ? (
+                      <>
+                        <Shield className="w-8 h-8 text-gumroad-pink animate-pulse mb-2" />
+                        <p className="text-sm font-medium text-gray-700">Encrypting with Seal...</p>
+                      </>
+                    ) : isUploading ? (
+                      <>
+                        <Upload className="w-8 h-8 text-gumroad-pink animate-bounce mb-2" />
+                        <p className="text-sm font-medium text-gray-700">Uploading to Walrus...</p>
+                      </>
+                    ) : blobId ? (
+                      <>
+                        <CheckCircle2 className="w-8 h-8 text-green-600 mb-2" />
+                        <p className="text-sm font-medium text-green-700">
+                          {encryptionMetadata ? 'Encrypted & Uploaded!' : 'Uploaded!'}
+                        </p>
+                        <p className="text-xs text-gray-500 mt-1">Click to replace</p>
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="w-8 h-8 text-gray-400 mb-2" />
+                        <p className="text-sm font-medium text-gray-700">Click to select file</p>
+                        <p className="text-xs text-gray-500 mt-1">
+                          {useEncryption && requiredTier > 0 ? 'Will be encrypted with Seal' : 'Direct upload'}
+                        </p>
+                      </>
+                    )}
+                  </label>
+                </div>
+                
                 {blobId && (
-                  <div className="flex items-center gap-2 text-sm text-gumroad-pink">
-                    <CheckCircle2 className="w-4 h-4" />
-                    <span className="font-medium">Uploaded successfully</span>
+                  <div className="flex items-center gap-2 text-sm">
+                    <CheckCircle2 className="w-4 h-4 text-green-600" />
+                    <span className="font-medium text-green-700">
+                      {encryptionMetadata ? '🔐 Encrypted & uploaded' : '📤 Uploaded'}
+                    </span>
                   </div>
                 )}
               </div>
