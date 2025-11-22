@@ -1,17 +1,15 @@
 'use client';
 
-import { use, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useLandingPageByCreator } from '@/hooks/contracts/useLandingPage';
 import { CreatorLandingPage } from '@/types/creator-landing';
 import LivePreview from '@/components/creator-landing/builder/LivePreview';
 import { Loader2 } from 'lucide-react';
+import { useParams } from 'next/navigation';
 
-interface PageProps {
-  params: Promise<{ address: string }>;
-}
-
-export default function PublicLandingPage({ params }: PageProps) {
-  const { address } = use(params);
+export default function PublicLandingPage() {
+  const params = useParams();
+  const address = params?.address as string;
   const { landingPage, isLoading, error } = useLandingPageByCreator(address);
   const [pageData, setPageData] = useState<CreatorLandingPage | null>(null);
 
