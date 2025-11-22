@@ -12,6 +12,7 @@ export type CreatePostInput = {
   contentType: 0 | 1 | 2 | 3 | 4; // see content.move constants
   walrusBlobId: string;
   requiredTier: 0 | 1 | 2 | 3; // 0 = public
+  encryptionMetadata?: string; // Seal encryption metadata (JSON string)
 };
 
 function assertConfigured() {
@@ -30,6 +31,14 @@ export function useCreatePost() {
 
     const tx = new Transaction();
 
+    console.log('📝 [useCreatePost] Creating post with params:', {
+      registryId: input.registryId,
+      title: input.title,
+      contentType: input.contentType,
+      requiredTier: input.requiredTier,
+      hasEncryption: !!input.encryptionMetadata
+    });
+    
     tx.moveCall({
       target: `${CONTENT_PACKAGE_ID}::content::create_post`,
       arguments: [
@@ -39,9 +48,12 @@ export function useCreatePost() {
         tx.pure.u8(input.contentType),
         tx.pure.string(input.walrusBlobId),
         tx.pure.u8(input.requiredTier),
+        tx.pure.string(input.encryptionMetadata || ''), // Seal encryption metadata
         tx.object(SUI_CLOCK_OBJECT_ID),
       ],
     });
+    
+    console.log('✅ [useCreatePost] Transaction prepared');
 
     tx.setGasBudget(20_000_000);
 

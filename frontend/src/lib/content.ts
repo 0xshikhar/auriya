@@ -16,6 +16,9 @@ export interface ContentPostFields {
   views: string | number;
   is_published: boolean;
   tags: string[] | { fields?: { name: string }[] };
+  // Seal encryption metadata stored on-chain as Option<String>
+  // Can be a string, or an object with `{ fields: { some: string } }` depending on RPC shape
+  encryption_metadata?: any;
 }
 
 export async function getObjectFields(client: SuiClient, objectId: string): Promise<any | null> {

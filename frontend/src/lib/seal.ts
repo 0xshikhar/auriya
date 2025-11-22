@@ -1,4 +1,6 @@
 import { SealClient, SessionKey, type EncryptOptions, type DecryptOptions, DemType } from '@mysten/seal';
+import { fromB64 } from '@mysten/bcs';
+// no signer imports needed
 import { createSuiClient } from './sui';
 import { 
   SEAL_ACCESS_CONTROL_PACKAGE_ID, 
@@ -33,6 +35,8 @@ export function createSealClient() {
 // Global Seal client instance
 export const sealClient = createSealClient();
 
+// (no-op helper removed; we use fromSerializedSignature)
+
 export interface EncryptedContent {
   encryptedData: Uint8Array;
   encryptionMetadata: {
@@ -66,8 +70,26 @@ export async function encryptContent(
     const data = new Uint8Array(arrayBuffer);
     console.log('✅ [Seal] File converted:', data.length, 'bytes');
 
-    // Generate unique ID for this content
-    const contentId = `${creatorAddress}:${Date.now()}:${requiredTier}`;
+    // Generate unique ID for this content (must be valid hex string)
+    // Combine creator address, timestamp, and tier into a hex string
+    const timestamp = Date.now();
+    const uniqueString = `${creatorAddress}-${timestamp}-${requiredTier}-${file.name}`;
+    
+    // Create a simple hash by converting to bytes and taking first 32 bytes
+    const encoder = new TextEncoder();
+    const bytes = encoder.encode(uniqueString);
+    
+    // Create a 32-byte hex ID by repeating/truncating the bytes
+    const idBytes = new Uint8Array(32);
+    for (let i = 0; i < 32; i++) {
+      idBytes[i] = bytes[i % bytes.length];
+    }
+    
+    // Convert to hex string
+    const contentId = '0x' + Array.from(idBytes)
+      .map(b => b.toString(16).padStart(2, '0'))
+      .join('');
+    
     console.log('🆔 [Seal] Generated content ID:', contentId);
 
     // Encrypt using Seal
@@ -117,11 +139,13 @@ export async function encryptContent(
 /**
  * Create a session key for decryption
  * @param address - User's Sui address
+ * @param signPersonalMessage - Function to sign personal messages from wallet
  * @param packageId - Access control package ID
  * @returns Session key
  */
 export async function createSealSessionKey(
   address: string,
+  signPersonalMessage: (message: { message: Uint8Array }) => Promise<{ signature: string }>,
   packageId: string = SEAL_ACCESS_CONTROL_PACKAGE_ID
 ): Promise<SessionKey> {
   console.log('🔑 [Seal] Creating session key...');
@@ -130,13 +154,21 @@ export async function createSealSessionKey(
   
   try {
     const suiClient = createSuiClient();
-    
+
+    // Create session key without passing a signer; we will sign the personal message ourselves
     const sessionKey = await SessionKey.create({
       address,
       packageId,
       ttlMin: SEAL_SESSION_KEY_TTL,
       suiClient: suiClient as any,
     });
+
+    // Obtain the personal message from the session key and sign it with the wallet
+    const personalMessage = sessionKey.getPersonalMessage();
+    console.log('✍️ [Seal] Signing session personal message...');
+    const { signature } = await signPersonalMessage({ message: personalMessage });
+    await sessionKey.setPersonalMessageSignature(signature);
+    console.log('✅ [Seal] Session personal message signed & attached');
     
     console.log('✅ [Seal] Session key created successfully');
     return sessionKey;
@@ -158,9 +190,9 @@ export async function createSealSessionKey(
 export async function decryptContent(
   encryptedData: Uint8Array,
   encryptionMetadata: any,
-  subscriptionNftId: string,
+  subscriptionNftId: string | undefined,
   sessionKey: SessionKey,
-  txBytes: Uint8Array
+  txBytes?: Uint8Array
 ): Promise<Uint8Array> {
   console.log('🔓 [Seal] Starting decryption process...');
   console.log('📊 [Seal] Encrypted data size:', encryptedData.length, 'bytes');
@@ -178,9 +210,9 @@ export async function decryptContent(
     const decryptOptions: DecryptOptions = {
       data: encryptedData,
       sessionKey,
-      txBytes,
       checkShareConsistency: true,
-    };
+      ...(txBytes && txBytes.length > 0 ? { txBytes } : {}),
+    } as DecryptOptions;
 
     const decrypted = await sealClient.decrypt(decryptOptions);
     console.log('✅ [Seal] Decryption successful!');
