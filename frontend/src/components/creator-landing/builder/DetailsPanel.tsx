@@ -25,6 +25,7 @@ interface ExpandableSection {
 export default function DetailsPanel({ landingPage, onUpdate }: DetailsPanelProps) {
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
     pageName: false,
+    tagline: false,
     profilePhoto: false,
     headerOptions: false,
     themeColor: false,
@@ -64,15 +65,60 @@ export default function DetailsPanel({ landingPage, onUpdate }: DetailsPanelProp
         {expandedSections.pageName && (
           <div className="px-4 pb-4 space-y-3 border-t">
             <div className="pt-3">
+              <Label className="text-sm mb-2 block">Page name</Label>
               <Input
                 value={landingPage.header.pageName}
                 onChange={(e) =>
                   onUpdate({
-                    header: { ...landingPage.header, pageName: e.target.value },
+                    header: { 
+                      ...landingPage.header, 
+                      pageName: e.target.value,
+                      displayName: e.target.value, // Sync display name
+                    },
                   })
                 }
                 placeholder="Enter page name"
               />
+              <p className="text-xs text-muted-foreground mt-1">
+                This will be shown as your creator name on the page
+              </p>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Tagline */}
+      <div className="border rounded-lg">
+        <button
+          onClick={() => toggleSection('tagline')}
+          className="w-full px-4 py-3 flex items-center justify-between hover:bg-muted/50 transition-colors"
+        >
+          <div className="text-left">
+            <div className="font-medium text-sm">Tagline</div>
+          </div>
+          <ChevronRight
+            className={`h-4 w-4 transition-transform ${
+              expandedSections.tagline ? 'rotate-90' : ''
+            }`}
+          />
+        </button>
+        {expandedSections.tagline && (
+          <div className="px-4 pb-4 space-y-3 border-t">
+            <div className="pt-3">
+              <Label className="text-sm mb-2 block">Tagline</Label>
+              <Textarea
+                value={landingPage.header.tagline}
+                onChange={(e) =>
+                  onUpdate({
+                    header: { ...landingPage.header, tagline: e.target.value },
+                  })
+                }
+                placeholder="Enter your tagline"
+                rows={2}
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                A short description shown below your name
+              </p>
             </div>
           </div>
         )}
@@ -263,13 +309,27 @@ export default function DetailsPanel({ landingPage, onUpdate }: DetailsPanelProp
               defaultBlobId={landingPage.header.coverPhotoWalrusId}
             />
             {landingPage.header.coverPhotoWalrusId && (
-              <div className="relative h-32 w-full rounded-lg overflow-hidden border-2">
-                <Image
-                  src={getWalrusUrl(landingPage.header.coverPhotoWalrusId)}
-                  alt="Cover"
-                  fill
-                  className="object-cover"
-                />
+              <div className="space-y-2">
+                <div className="relative h-32 w-full rounded-lg overflow-hidden border-2">
+                  <Image
+                    src={getWalrusUrl(landingPage.header.coverPhotoWalrusId)}
+                    alt="Cover"
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() =>
+                    onUpdate({
+                      header: { ...landingPage.header, coverPhotoWalrusId: '' },
+                    })
+                  }
+                  className="w-full text-destructive hover:text-destructive"
+                >
+                  Remove Cover Photo
+                </Button>
               </div>
             )}
           </div>
