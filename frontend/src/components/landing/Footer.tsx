@@ -6,7 +6,7 @@ export default function Footer() {
           <div>
             <h3 className="font-bold mb-4">Auriya</h3>
             <p className="text-sm text-gray-600">
-              Decentralized creator monetization on Sui. Own your audience, keep 95% revenue.
+              Decentralized creator monetization on Sui. Own your audience, keep 97% revenue.
             </p>
           </div>
 

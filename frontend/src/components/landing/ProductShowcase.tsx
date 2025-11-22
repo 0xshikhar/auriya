@@ -192,7 +192,7 @@ export default function ProductShowcase() {
           >
             <h3 className="text-3xl md:text-4xl font-bold mb-6 bg-gradient-to-r from-black to-gray-700 bg-clip-text text-transparent">Instant payments</h3>
             <div className="space-y-4">
-              {['95% revenue share, paid instantly in SUI.', 'No chargebacks, no payment processor fees.'].map((item, idx) => (
+              {['97% revenue share, paid instantly in SUI.', 'No chargebacks, no payment processor fees.'].map((item, idx) => (
                 <motion.div 
                   key={idx}
                   className="flex gap-3"

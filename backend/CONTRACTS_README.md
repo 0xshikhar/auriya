@@ -320,7 +320,7 @@ sui client call \
 3. Frontend calls `subscription::purchase_subscription`
 4. Smart contract:
    - Validates payment
-   - Splits fees (95% creator, 5% platform)
+   - Splits fees (97% creator, 5% platform)
    - Mints SubscriptionNFT
    - Transfers NFT to fan
 5. Fan now owns access NFT in their wallet

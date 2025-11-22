@@ -68,7 +68,7 @@ export default function Hero() {
           transition={{ duration: 0.6, delay: 0.1 }}
         >
           Own your audience.
-          <br />Keep 95% revenue.
+          <br />Keep 97% revenue.
         </motion.h1>
         
         <motion.p 
