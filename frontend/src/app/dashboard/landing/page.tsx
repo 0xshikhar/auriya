@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import PageBuilder from '@/components/creator-landing/builder/PageBuilder';
-import { CreatorLandingPage } from '@/types/creator-landing';
+import { CreatorLandingPage, DEFAULT_SECTIONS, DEFAULT_THEME } from '@/types/creator-landing';
 import { useCurrentAccount } from '@mysten/dapp-kit';
 import { toast } from 'sonner';
 import { useCreateLandingPage, useUpdateLandingPage, usePublishLandingPage, useLandingPageByCreator } from '@/hooks/contracts/useLandingPage';
@@ -44,15 +44,8 @@ export default function LandingPageBuilderPage() {
             showJoinButton: true,
             joinButtonText: 'Join for free',
           },
-          theme: {
-            primaryColor: '#FF90E8',
-            accentColor: '#3c3f44',
-            backgroundColor: '#1a1a1a',
-            textColor: '#ffffff',
-            fontFamily: 'Inter',
-            useProfilePhotoColor: false,
-          },
-          sections: [],
+          theme: DEFAULT_THEME,
+          sections: DEFAULT_SECTIONS,
           socialLinks: {},
           customKeywords: [profile.category],
           visibility: 'public',
