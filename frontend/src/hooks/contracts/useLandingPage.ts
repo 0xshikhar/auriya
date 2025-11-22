@@ -1,15 +1,15 @@
-import { useSuiClientMutation, useSuiClientQuery } from '@mysten/dapp-kit';
+import { useSignAndExecuteTransaction, useSuiClientQuery } from '@mysten/dapp-kit';
 import { Transaction } from '@mysten/sui/transactions';
 import { CREATOR_PROFILE_PACKAGE_ID, LANDING_PAGE_REGISTRY_ID } from '@/lib/constants';
 import { CreatorLandingPage } from '@/types/creator-landing';
 import { saveLandingPageToWalrus, loadLandingPageFromWalrus } from '@/lib/landing-storage';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 /**
  * Hook to create a new landing page
  */
 export function useCreateLandingPage() {
-  const { mutateAsync, isPending } = useSuiClientMutation('signAndExecuteTransaction');
+  const signAndExecute = useSignAndExecuteTransaction();
   const [uploading, setUploading] = useState(false);
 
   const createLandingPage = async (
@@ -36,9 +36,9 @@ export function useCreateLandingPage() {
         ],
       });
       
-      const result = await mutateAsync({
+      const result = await signAndExecute.mutateAsync({
         transaction: tx,
-      } as any);
+      });
       
       return {
         ...result,
@@ -51,7 +51,7 @@ export function useCreateLandingPage() {
 
   return {
     createLandingPage,
-    isPending: isPending || uploading,
+    isPending: signAndExecute.isPending || uploading,
   };
 }
 
@@ -59,7 +59,7 @@ export function useCreateLandingPage() {
  * Hook to update an existing landing page
  */
 export function useUpdateLandingPage() {
-  const { mutateAsync, isPending } = useSuiClientMutation('signAndExecuteTransaction');
+  const signAndExecute = useSignAndExecuteTransaction();
   const [uploading, setUploading] = useState(false);
 
   const updateLandingPage = async (
@@ -85,14 +85,9 @@ export function useUpdateLandingPage() {
         ],
       });
       
-      const result = await mutateAsync({
+      return signAndExecute.mutateAsync({
         transaction: tx,
-      } as any);
-      
-      return {
-        ...result,
-        blobId,
-      };
+      });
     } finally {
       setUploading(false);
     }
@@ -100,7 +95,7 @@ export function useUpdateLandingPage() {
 
   return {
     updateLandingPage,
-    isPending: isPending || uploading,
+    isPending: signAndExecute.isPending || uploading,
   };
 }
 
@@ -108,7 +103,7 @@ export function useUpdateLandingPage() {
  * Hook to publish a landing page
  */
 export function usePublishLandingPage() {
-  const { mutateAsync, isPending } = useSuiClientMutation('signAndExecuteTransaction');
+  const signAndExecute = useSignAndExecuteTransaction();
 
   const publishLandingPage = async (configObjectId: string) => {
     const tx = new Transaction();
@@ -121,14 +116,14 @@ export function usePublishLandingPage() {
       ],
     });
     
-    return mutateAsync({
+    return signAndExecute.mutateAsync({
       transaction: tx,
-    } as any);
+    });
   };
 
   return {
     publishLandingPage,
-    isPending,
+    isPending: signAndExecute.isPending,
   };
 }
 
@@ -161,7 +156,7 @@ export function useLandingPageData(configObjectId?: string) {
   const [error, setError] = useState<string | null>(null);
 
   // Load landing page from Walrus when config is available
-  useState(() => {
+  useEffect(() => {
     if (!configData?.data?.content) return;
     
     const loadData = async () => {
@@ -188,7 +183,7 @@ export function useLandingPageData(configObjectId?: string) {
     };
     
     loadData();
-  });
+  }, [configData]);
 
   return {
     landingPage,
