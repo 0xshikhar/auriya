@@ -46,6 +46,7 @@ module content::content {
         views: u64,
         is_published: bool,
         tags: vector<String>,
+        encryption_metadata: Option<String>,      // Seal encryption metadata (JSON string)
     }
     
     /// Creator's content registry (shared object)
@@ -151,6 +152,7 @@ module content::content {
         content_type: u8,
         walrus_blob_id: String,
         required_tier: u8,
+        encryption_metadata: String,  // Seal encryption metadata (JSON string, empty if not encrypted)
         clock: &Clock,
         ctx: &mut TxContext
     ) {
@@ -162,6 +164,13 @@ module content::content {
         
         let current_time = clock::timestamp_ms(clock);
         let is_public = required_tier == TIER_PUBLIC;
+        
+        // Convert encryption_metadata to Option - none if empty string
+        let encryption_opt = if (string::is_empty(&encryption_metadata)) {
+            option::none()
+        } else {
+            option::some(encryption_metadata)
+        };
         
         let post = ContentPost {
             id: object::new(ctx),
@@ -178,6 +187,7 @@ module content::content {
             views: 0,
             is_published: true,  // Auto-publish for now
             tags: vector::empty(),
+            encryption_metadata: encryption_opt,  // Store Seal encryption metadata as Option
         };
         
         let post_id = object::id(&post);
