@@ -39,21 +39,33 @@ export function useSubscriptions(subscriberAddress?: string) {
   
   const subscriptions: SubscriptionData[] = data?.data
     ?.map((obj) => {
-      const fields = obj.data?.content?.fields as any;
-      if (!fields) {
-        console.warn('⚠️ [useSubscriptions] No fields found for object:', obj.data?.objectId);
+      const objData = obj.data;
+      if (!objData) {
+        console.warn('⚠️ [useSubscriptions] Missing data for object response:', obj);
         return null;
       }
-      
+
+      const content = objData.content as any;
+      if (!content || content.dataType !== 'moveObject') {
+        console.warn('⚠️ [useSubscriptions] Object is not a Move object or has no content:', objData.objectId);
+        return null;
+      }
+
+      const fields = content.fields as any | undefined;
+      if (!fields) {
+        console.warn('⚠️ [useSubscriptions] No fields found for object:', objData.objectId);
+        return null;
+      }
+
       const subscription: SubscriptionData = {
-        id: obj.data.objectId,
+        id: objData.objectId!,
         creator: fields.creator,
         subscriber: fields.subscriber,
-        tier_level: fields.tier_level,
-        is_cancelled: fields.is_cancelled,
-        expires_at: parseInt(fields.expires_at || '0'),
+        tier_level: Number(fields.tier_level ?? fields.tier_id ?? 0),
+        is_cancelled: Boolean(fields.is_cancelled ?? false),
+        expires_at: Number(fields.expires_at ?? '0'),
       };
-      
+
       console.log('🎫 [useSubscriptions] Found subscription:', subscription);
       return subscription;
     })

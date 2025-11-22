@@ -21,10 +21,10 @@ export default function ProfileSetupPage() {
   const currentAccount = useCurrentAccount();
   const { session: zkLoginSession } = useZkLogin();
   const router = useRouter();
-  
+
   // Check if user already has a profile
   const { profile, hasProfile, isLoading: profileLoading } = useCreatorProfile(currentAccount?.address);
-  
+
   const [displayName, setDisplayName] = useState('');
   const [bio, setBio] = useState('');
   const [category, setCategory] = useState('Art');
@@ -52,12 +52,12 @@ export default function ProfileSetupPage() {
     e.preventDefault();
     setError(null);
     setTxDigest(null);
-    
+
     if (hasProfile) {
       setError('You already have a profile. Profile updates coming soon!');
       return;
     }
-    
+
     try {
       const res = await createProfile({
         displayName,
@@ -68,7 +68,7 @@ export default function ProfileSetupPage() {
       });
       // @ts-ignore
       setTxDigest(res?.digest || null);
-      
+
       // Redirect to landing page after successful creation
       setTimeout(() => {
         router.push('/dashboard/landing');
@@ -98,34 +98,41 @@ export default function ProfileSetupPage() {
           <ArrowLeft className="w-4 h-4" />
           Back to Dashboard
         </Link>
-        
+
         {/* Header */}
         <div className="mb-12">
           <h1 className="text-5xl font-bold text-black mb-4">
             {hasProfile ? 'Your Profile' : 'Create Your Profile'}
           </h1>
           <p className="text-xl text-gray-600">
-            {hasProfile 
-              ? 'Your onchain creator identity. Profile editing coming soon!' 
+            {hasProfile
+              ? 'Your onchain creator identity. Profile editing coming soon!'
               : 'Set up your onchain creator identity. All media stored permanently on Walrus.'}
           </p>
         </div>
-        
+
         {/* Profile exists notification */}
         {hasProfile && (
-          <div className="mb-8 p-6 bg-blue-50 border-2 border-blue-200 rounded-xl flex items-start gap-3">
+          <div className="mb-8 p-6 bg-gumroad-pink/20 border-2 border-blue-200 rounded-xl flex items-start gap-3">
             <CheckCircle2 className="w-6 h-6 text-blue-600 flex-shrink-0 mt-0.5" />
             <div className="flex-1">
-              <p className="text-lg font-semibold text-blue-900 mb-1">Profile Already Created</p>
-              <p className="text-sm text-blue-700 mb-3">
-                You created your profile on {new Date(profile!.createdAt).toLocaleDateString()}. 
+              <p className="text-lg font-semibold text-gray-900 mb-1">Profile Already Created</p>
+              <p className="text-sm text-gray-700 mb-3">
+                You created your profile on {new Date(profile!.createdAt).toLocaleDateString()}.
                 Profile editing functionality is coming soon.
               </p>
-              <Link 
-                href="/dashboard/landing" 
-                className="inline-flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition text-sm font-medium"
+              <Link
+                href="/dashboard/landing"
+                className="inline-flex items-center gap-2 m-1 bg-gumroad-pink text-black px-4 py-2 rounded-lg hover:bg-gumroad-pink transition text-sm font-medium"
               >
                 Customize Your Landing Page →
+              </Link>
+              {/* go to dashboard */}
+              <Link
+                href="/dashboard/"
+                className="inline-flex items-center  m-1 gap-2 bg-black text-white px-4 py-2 rounded-lg hover:bg-black transition text-sm font-medium"
+              >
+                Go to Dashboard →
               </Link>
             </div>
           </div>
@@ -156,7 +163,7 @@ export default function ProfileSetupPage() {
         </div>
 
         <div className="bg-white border-2 border-gray-200 rounded-2xl p-10 shadow-sm">{/* Form content */}
-          
+
           {/* Wallet connection warning */}
           {hasOnlyZkLogin && (
             <div className="mb-6 p-6 bg-amber-50 border-2 border-amber-200 rounded-xl flex items-start gap-3">
@@ -164,8 +171,8 @@ export default function ProfileSetupPage() {
               <div>
                 <p className="text-lg font-semibold text-amber-900 mb-1">Sui Wallet Required</p>
                 <p className="text-sm text-amber-700 mb-3">
-                  Profile creation requires a Sui wallet connection to sign transactions. 
-                  zkLogin authentication alone is not sufficient at this time.
+                  Profile creation requires a Sui wallet connection to sign transactions.
+                  or use pre-funded wallet ZK wallet
                 </p>
                 <p className="text-sm text-amber-700">
                   Please connect your Sui wallet using the wallet button in the navigation bar to continue.
@@ -185,7 +192,7 @@ export default function ProfileSetupPage() {
               </div>
             </div>
           )}
-          
+
           <form onSubmit={onSubmit} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
@@ -234,8 +241,8 @@ export default function ProfileSetupPage() {
             </div>
 
             <div className="flex justify-end gap-4 pt-8 border-t border-gray-200">
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
                 disabled={isPending || !avatarId || !bannerId || !hasWallet || hasProfile}
                 className="bg-black hover:bg-gray-800 text-white px-8 py-3 rounded-full font-semibold text-lg disabled:opacity-50"
               >

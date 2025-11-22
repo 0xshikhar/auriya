@@ -7,9 +7,10 @@ import { startZkLogin } from '@/lib/enoki';
 import { useCreatorProfile } from '@/hooks/contracts/useCreatorProfile';
 import { useCreatorTiers } from '@/hooks/contracts/useCreatorTiers';
 import { useCreatorContent } from '@/hooks/contracts/useCreatorContent';
+import { useUnifiedAccount } from '@/hooks/useUnifiedAccount';
 
 export default function DashboardPage() {
-  const account = useCurrentAccount();
+  const { selected: account } = useUnifiedAccount();
   const { profile, hasProfile, isLoading: profileLoading } = useCreatorProfile(account?.address);
   const { tiers, subscriptionObjectId } = useCreatorTiers(account?.address);
   const { postCount, posts } = useCreatorContent(profile?.contentRegistryId);
