@@ -198,7 +198,7 @@ export function useLandingPageData(configObjectId?: string) {
  * Queries owned objects to find the landing page config
  */
 export function useLandingPageByCreator(creatorAddress?: string) {
-  const { data: ownedObjects } = useSuiClientQuery(
+  const { data: ownedObjects, refetch } = useSuiClientQuery(
     'getOwnedObjects',
     {
       owner: creatorAddress!,
@@ -211,10 +211,17 @@ export function useLandingPageByCreator(creatorAddress?: string) {
     },
     {
       enabled: !!creatorAddress,
+      refetchInterval: 5000, // Refetch every 5 seconds
+      staleTime: 0, // Always consider data stale
     }
   );
 
   const configObjectId = ownedObjects?.data?.[0]?.data?.objectId;
   
-  return useLandingPageData(configObjectId);
+  const landingPageData = useLandingPageData(configObjectId);
+  
+  return {
+    ...landingPageData,
+    refetch,
+  };
 }
