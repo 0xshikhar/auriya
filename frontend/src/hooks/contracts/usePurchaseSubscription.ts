@@ -2,8 +2,8 @@
 
 import { useCallback } from 'react';
 import { Transaction } from '@mysten/sui/transactions';
-import { useSignAndExecuteTransaction } from '@mysten/dapp-kit';
 import { SUBSCRIPTION_PACKAGE_ID, SUBSCRIPTION_TREASURY_ID, SUI_CLOCK_OBJECT_ID } from '@/lib/constants';
+import { useUnifiedTransaction } from '@/hooks/useUnifiedTransaction';
 
 export type PurchaseInput = {
   subsId: string; // CreatorSubscriptions shared object id
@@ -22,7 +22,7 @@ function assertConfigured(treasuryId: string) {
 }
 
 export function usePurchaseSubscription() {
-  const signAndExecute = useSignAndExecuteTransaction();
+  const { signAndExecute, isPending } = useUnifiedTransaction();
 
   const purchase = useCallback(async (input: PurchaseInput) => {
     const treasuryId = input.overrideTreasuryId || SUBSCRIPTION_TREASURY_ID;
@@ -31,7 +31,8 @@ export function usePurchaseSubscription() {
     if (!input.subsId) throw new Error('Missing CreatorSubscriptions ID');
     if (!input.tierId || input.tierId <= 0) throw new Error('Invalid tier');
 
-    const amountMist = BigInt(Math.round(input.amountSui * 1_000_000_000));
+    // Ceil to ensure payment is never under the required price due to float rounding
+    const amountMist = BigInt(Math.ceil(input.amountSui * 1_000_000_000));
 
     const tx = new Transaction();
 
@@ -51,10 +52,10 @@ export function usePurchaseSubscription() {
 
     tx.setGasBudget(30_000_000);
 
-    const res = await signAndExecute.mutateAsync({ transaction: tx });
+    const res = await signAndExecute({ transaction: tx });
 
     return res;
   }, [signAndExecute]);
 
-  return { purchase, isPending: signAndExecute.isPending } as const;
+  return { purchase, isPending } as const;
 }

@@ -2,11 +2,11 @@
 
 import { useCallback } from 'react';
 import { Transaction } from '@mysten/sui/transactions';
-import { useSignAndExecuteTransaction } from '@mysten/dapp-kit';
 import { CREATOR_PROFILE_PACKAGE_ID } from '@/lib/constants';
+import { useUnifiedTransaction } from '@/hooks/useUnifiedTransaction';
 
 export function useLinkContentRegistry() {
-  const signAndExecute = useSignAndExecuteTransaction();
+  const { signAndExecute, isPending } = useUnifiedTransaction();
 
   const linkRegistry = useCallback(async (profileId: string, registryId: string) => {
     if (!CREATOR_PROFILE_PACKAGE_ID || CREATOR_PROFILE_PACKAGE_ID.startsWith('REPLACE_WITH')) {
@@ -27,9 +27,9 @@ export function useLinkContentRegistry() {
     });
     tx.setGasBudget(10_000_000);
 
-    const res = await signAndExecute.mutateAsync({ transaction: tx });
+    const res = await signAndExecute({ transaction: tx });
     return res;
   }, [signAndExecute]);
 
-  return { linkRegistry, isPending: signAndExecute.isPending } as const;
+  return { linkRegistry, isPending } as const;
 }

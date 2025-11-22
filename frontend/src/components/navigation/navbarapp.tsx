@@ -3,16 +3,64 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React from "react";
-import { ConnectButton } from "@mysten/dapp-kit";
+import { ConnectButton, useConnectWallet, useWallets, useDisconnectWallet } from "@mysten/dapp-kit";
+import { isEnokiWallet, type EnokiWallet } from "@mysten/enoki";
 import { startZkLogin } from "@/lib/enoki";
 import { useUnifiedAccount } from "@/hooks/useUnifiedAccount";
 import AddressName from "@/components/web3/AddressName";
-import { Star } from "lucide-react";
+import { Star, Copy as CopyIcon, Check as CheckIcon } from "lucide-react";
 import Image from "next/image";
 
 export default function NavbarApp() {
   const router = useRouter();
   const { accounts, selected, selectedType, choose, disconnectZkLogin } = useUnifiedAccount();
+  const { mutateAsync: connect } = useConnectWallet();
+  const allWallets = useWallets();
+  const enokiWallets = allWallets.filter(isEnokiWallet) as EnokiWallet[];
+  const disconnectWalletMutation = useDisconnectWallet();
+  const [copied, setCopied] = React.useState<string | null>(null);
+
+  const connectEnoki = () => {
+    const wallet = enokiWallets.find((w) => w.provider === 'google');
+    if (wallet) {
+      connect({ wallet });
+    } else {
+      // Fallback to legacy flow if wallets are not registered yet
+      startZkLogin('google');
+    }
+  };
+
+  const disconnectWallet = async () => {
+    try {
+      // First, try official dapp-kit disconnect
+      await disconnectWalletMutation.mutateAsync();
+
+      // Extra safety: directly invoke wallet-standard disconnect on the actual wallet instance
+      const wallet = allWallets.find((w) => (w.accounts || []).some((a) => a.address === selected?.address));
+      const directDisconnect = (wallet as any)?.features?.['standard:disconnect']?.disconnect as undefined | (() => Promise<void> | void);
+      if (directDisconnect) {
+        await directDisconnect();
+      }
+
+      // If wallet was selected but zklogin exists, switch selection to zklogin
+      const hasZk = accounts.some((a) => a.type === 'zklogin');
+      if (selectedType === 'wallet' && hasZk) choose('zklogin');
+    } catch (e) {
+      console.error('[Navbar] Wallet disconnect failed:', e);
+    }
+  };
+
+  const copyAddress = async (address: string, e: React.MouseEvent) => {
+    try {
+      e.stopPropagation();
+      e.preventDefault();
+      await navigator.clipboard.writeText(address);
+      setCopied(address);
+      setTimeout(() => setCopied(null), 1500);
+    } catch (err) {
+      console.error('[Navbar] Failed to copy address:', err);
+    }
+  };
 
   return (
     <nav className="bg-white border-b border-gray-200">
@@ -48,7 +96,7 @@ export default function NavbarApp() {
             {!selected ? (
               <>
                 <button
-                  onClick={() => startZkLogin('google')}
+                  onClick={connectEnoki}
                   className="px-4 py-2 text-black bg-gumroad-pink hover:bg-gumroad-pink/80 rounded-lg transition font-medium"
                 >
                   Log in
@@ -59,6 +107,17 @@ export default function NavbarApp() {
               <div className="relative group">
                 <button className="px-4 py-2 bg-black text-white hover:bg-gray-800 rounded-lg transition font-medium flex items-center gap-2">
                   <AddressName address={selected.address} />
+                  <span
+                    title="Copy address"
+                    onClick={(e) => copyAddress(selected.address, e)}
+                    className="inline-flex items-center justify-center rounded hover:bg-white/10 p-1"
+                  >
+                    {copied === selected.address ? (
+                      <CheckIcon className="w-4 h-4" />
+                    ) : (
+                      <CopyIcon className="w-4 h-4" />
+                    )}
+                  </span>
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
@@ -81,7 +140,20 @@ export default function NavbarApp() {
                             </svg>
                           )}
                         </div>
-                        <div className="font-mono text-sm text-black mt-1"><AddressName address={a.address} /></div>
+                        <div className="mt-1 flex items-center justify-between">
+                          <div className="font-mono text-sm text-black"><AddressName address={a.address} /></div>
+                          <button
+                            title="Copy address"
+                            onClick={(e) => copyAddress(a.address, e)}
+                            className="p-1 rounded hover:bg-gray-100"
+                          >
+                            {copied === a.address ? (
+                              <CheckIcon className="w-4 h-4 text-gumroad-pink" />
+                            ) : (
+                              <CopyIcon className="w-4 h-4 text-gray-600" />
+                            )}
+                          </button>
+                        </div>
                       </button>
                     ))}
                     
@@ -100,7 +172,7 @@ export default function NavbarApp() {
                     )}
                     {!accounts.find(a => a.type === 'zklogin') && (
                       <button
-                        onClick={() => startZkLogin('google')}
+                        onClick={connectEnoki}
                         className="w-full text-left px-4 py-2 hover:bg-gray-50 text-gray-700 text-sm transition"
                       >
                         + Connect zkLogin
@@ -111,12 +183,22 @@ export default function NavbarApp() {
                   
                     <div className="my-2 border-t border-gray-200" />
                     
-                    <button
-                      onClick={disconnectZkLogin}
-                      className="w-full text-left px-4 py-2 hover:bg-red-50 text-red-600 text-sm transition"
-                    >
-                      Disconnect
-                    </button>
+                    {accounts.find(a => a.type === 'wallet') && (
+                      <button
+                        onClick={disconnectWallet}
+                        className="w-full text-left px-4 py-2 hover:bg-red-50 text-red-600 text-sm transition"
+                      >
+                        Disconnect Wallet
+                      </button>
+                    )}
+                    {accounts.find(a => a.type === 'zklogin') && (
+                      <button
+                        onClick={disconnectZkLogin}
+                        className="w-full text-left px-4 py-2 hover:bg-red-50 text-red-600 text-sm transition"
+                      >
+                        Logout zkLogin
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>
@@ -127,3 +209,4 @@ export default function NavbarApp() {
     </nav>
   );
 }
+

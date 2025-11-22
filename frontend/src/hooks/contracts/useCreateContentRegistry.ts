@@ -2,8 +2,9 @@
 
 import { useCallback } from 'react';
 import { Transaction } from '@mysten/sui/transactions';
-import { useSignAndExecuteTransaction, useSuiClient } from '@mysten/dapp-kit';
+import { useSuiClient } from '@mysten/dapp-kit';
 import { CONTENT_PACKAGE_ID } from '@/lib/constants';
+import { useUnifiedTransaction } from '@/hooks/useUnifiedTransaction';
 
 function assertConfigured() {
   if (!CONTENT_PACKAGE_ID || CONTENT_PACKAGE_ID.startsWith('REPLACE_WITH')) {
@@ -12,7 +13,7 @@ function assertConfigured() {
 }
 
 export function useCreateContentRegistry() {
-  const signAndExecute = useSignAndExecuteTransaction();
+  const { signAndExecute, isPending } = useUnifiedTransaction();
   const suiClient = useSuiClient();
 
   const createRegistry = useCallback(async () => {
@@ -25,7 +26,7 @@ export function useCreateContentRegistry() {
     });
     tx.setGasBudget(20_000_000);
 
-    const res = await signAndExecute.mutateAsync({ transaction: tx });
+    const res = await signAndExecute({ transaction: tx });
 
     // Wait for transaction to be indexed and fetch object changes
     const digest = (res as any)?.digest as string | undefined;
@@ -72,5 +73,5 @@ export function useCreateContentRegistry() {
     };
   }, [signAndExecute, suiClient]);
 
-  return { createRegistry, isPending: signAndExecute.isPending } as const;
+  return { createRegistry, isPending } as const;
 }

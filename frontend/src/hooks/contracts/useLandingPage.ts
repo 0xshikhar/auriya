@@ -1,15 +1,16 @@
-import { useSignAndExecuteTransaction, useSuiClientQuery } from '@mysten/dapp-kit';
+import { useSuiClientQuery } from '@mysten/dapp-kit';
 import { Transaction } from '@mysten/sui/transactions';
 import { CREATOR_PROFILE_PACKAGE_ID, LANDING_PAGE_REGISTRY_ID } from '@/lib/constants';
 import { CreatorLandingPage } from '@/types/creator-landing';
 import { saveLandingPageToWalrus, loadLandingPageFromWalrus } from '@/lib/landing-storage';
 import { useState, useEffect } from 'react';
+import { useUnifiedTransaction } from '@/hooks/useUnifiedTransaction';
 
 /**
  * Hook to create a new landing page
  */
 export function useCreateLandingPage() {
-  const signAndExecute = useSignAndExecuteTransaction();
+  const { signAndExecute, isPending: unifiedPending } = useUnifiedTransaction();
   const [uploading, setUploading] = useState(false);
 
   const createLandingPage = async (
@@ -36,9 +37,7 @@ export function useCreateLandingPage() {
         ],
       });
       
-      const result = await signAndExecute.mutateAsync({
-        transaction: tx,
-      });
+      const result = await signAndExecute({ transaction: tx });
       
       return {
         ...result,
@@ -51,7 +50,7 @@ export function useCreateLandingPage() {
 
   return {
     createLandingPage,
-    isPending: signAndExecute.isPending || uploading,
+    isPending: unifiedPending || uploading,
   };
 }
 
@@ -59,7 +58,7 @@ export function useCreateLandingPage() {
  * Hook to update an existing landing page
  */
 export function useUpdateLandingPage() {
-  const signAndExecute = useSignAndExecuteTransaction();
+  const { signAndExecute, isPending: unifiedPending } = useUnifiedTransaction();
   const [uploading, setUploading] = useState(false);
 
   const updateLandingPage = async (
@@ -85,9 +84,7 @@ export function useUpdateLandingPage() {
         ],
       });
       
-      return signAndExecute.mutateAsync({
-        transaction: tx,
-      });
+      return signAndExecute({ transaction: tx });
     } finally {
       setUploading(false);
     }
@@ -95,7 +92,7 @@ export function useUpdateLandingPage() {
 
   return {
     updateLandingPage,
-    isPending: signAndExecute.isPending || uploading,
+    isPending: unifiedPending || uploading,
   };
 }
 
@@ -103,7 +100,7 @@ export function useUpdateLandingPage() {
  * Hook to publish a landing page
  */
 export function usePublishLandingPage() {
-  const signAndExecute = useSignAndExecuteTransaction();
+  const { signAndExecute, isPending } = useUnifiedTransaction();
 
   const publishLandingPage = async (configObjectId: string) => {
     const tx = new Transaction();
@@ -116,14 +113,12 @@ export function usePublishLandingPage() {
       ],
     });
     
-    return signAndExecute.mutateAsync({
-      transaction: tx,
-    });
+    return signAndExecute({ transaction: tx });
   };
 
   return {
     publishLandingPage,
-    isPending: signAndExecute.isPending,
+    isPending,
   };
 }
 

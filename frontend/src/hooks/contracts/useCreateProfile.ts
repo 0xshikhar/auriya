@@ -2,8 +2,8 @@
 
 import { useCallback } from 'react';
 import { Transaction } from '@mysten/sui/transactions';
-import { useSignAndExecuteTransaction } from '@mysten/dapp-kit';
 import { CREATOR_PROFILE_PACKAGE_ID, CREATOR_PROFILE_REGISTRY_ID, SUI_CLOCK_OBJECT_ID } from '@/lib/constants';
+import { useUnifiedTransaction } from '@/hooks/useUnifiedTransaction';
 
 export type CreateProfileInput = {
   displayName: string;
@@ -23,7 +23,7 @@ function assertConfigured() {
 }
 
 export function useCreateProfile() {
-  const signAndExecute = useSignAndExecuteTransaction();
+  const { signAndExecute, isPending } = useUnifiedTransaction();
 
   const createProfile = useCallback(async (input: CreateProfileInput) => {
     assertConfigured();
@@ -45,10 +45,10 @@ export function useCreateProfile() {
 
     tx.setGasBudget(20_000_000);
 
-    const res = await signAndExecute.mutateAsync({ transaction: tx });
+    const res = await signAndExecute({ transaction: tx });
 
     return res;
   }, [signAndExecute]);
 
-  return { createProfile, isPending: signAndExecute.isPending } as const;
+  return { createProfile, isPending } as const;
 }

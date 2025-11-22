@@ -4,9 +4,21 @@ import Link from 'next/link'
 import { Github } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { startZkLogin } from '@/lib/enoki'
+import { useConnectWallet, useWallets } from '@mysten/dapp-kit'
+import { isEnokiWallet, type EnokiWallet } from '@mysten/enoki'
 import Image from 'next/image'
 
 export default function Header() {
+  const { mutateAsync: connect } = useConnectWallet();
+  const enokiWallets = useWallets().filter(isEnokiWallet) as EnokiWallet[];
+  const connectEnoki = async () => {
+    const wallet = enokiWallets.find((w) => w.provider === 'google');
+    if (wallet) {
+      await connect({ wallet });
+    } else {
+      startZkLogin('google');
+    }
+  };
   return (
     <motion.header 
       className="border-b border-gray-200/50 bg-white/80 backdrop-blur-xl sticky top-0 z-50"
@@ -41,13 +53,12 @@ export default function Header() {
           <motion.div whileHover={{ y: -2 }}>
             <a href="https://github.com/0xshikhar/auriya#readme" target="_blank" rel="noopener noreferrer" className="text-gray-600 hover:text-black transition font-medium">
               Docs
-            </a>
           </motion.div>
         </nav> */}
 
         <div className="flex items-center gap-4">
           <motion.button 
-            onClick={() => startZkLogin('google')}
+            onClick={connectEnoki}
             className="text-gray-600 hover:text-black transition text-sm font-bold "
             whileHover={{ scale: 1.05 }}
           >

@@ -1,18 +1,30 @@
 "use client";
 
 import Link from 'next/link';
-import { useCurrentAccount, useSuiClientQuery } from '@mysten/dapp-kit';
+import { useCurrentAccount, useSuiClientQuery, useConnectWallet, useWallets } from '@mysten/dapp-kit';
 import { BarChart3, FileText, Settings, TrendingUp, Users, DollarSign, Wallet, CheckCircle2, Sparkles } from 'lucide-react';
 import { startZkLogin } from '@/lib/enoki';
 import { useCreatorProfile } from '@/hooks/contracts/useCreatorProfile';
 import { useCreatorTiers } from '@/hooks/contracts/useCreatorTiers';
 import { useCreatorContent } from '@/hooks/contracts/useCreatorContent';
+import { isEnokiWallet, type EnokiWallet } from '@mysten/enoki';
 
 export default function DashboardPage() {
   const account = useCurrentAccount();
+  const { mutateAsync: connect } = useConnectWallet();
+  const enokiWallets = useWallets().filter(isEnokiWallet) as EnokiWallet[];
   const { profile, hasProfile, isLoading: profileLoading } = useCreatorProfile(account?.address);
   const { tiers, subscriptionObjectId } = useCreatorTiers(account?.address);
   const { postCount, posts } = useCreatorContent(profile?.contentRegistryId);
+
+  const connectEnoki = async () => {
+    const wallet = enokiWallets.find((w) => w.provider === 'google');
+    if (wallet) {
+      await connect({ wallet });
+    } else {
+      startZkLogin('google');
+    }
+  };
 
   // Fetch subscription object to get real stats
   const { data: subData } = useSuiClientQuery(
@@ -50,7 +62,7 @@ export default function DashboardPage() {
             <h2 className="text-2xl font-bold text-black mb-2">Connect to get started</h2>
             <p className="text-gray-600 mb-6">Sign in with zkLogin (Google) or connect your Sui wallet to access creator tools.</p>
             <button
-              onClick={() => startZkLogin('google')}
+              onClick={connectEnoki}
               className="bg-gradient-to-r from-black to-gray-900 text-white px-8 py-3 rounded-full hover:shadow-lg transition font-semibold"
             >
               Connect with zkLogin

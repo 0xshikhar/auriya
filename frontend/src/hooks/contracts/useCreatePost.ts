@@ -2,8 +2,8 @@
 
 import { useCallback } from 'react';
 import { Transaction } from '@mysten/sui/transactions';
-import { useSignAndExecuteTransaction } from '@mysten/dapp-kit';
 import { CONTENT_PACKAGE_ID, SUI_CLOCK_OBJECT_ID } from '@/lib/constants';
+import { useUnifiedTransaction } from '@/hooks/useUnifiedTransaction';
 
 export type CreatePostInput = {
   registryId: string;
@@ -22,7 +22,7 @@ function assertConfigured() {
 }
 
 export function useCreatePost() {
-  const signAndExecute = useSignAndExecuteTransaction();
+  const { signAndExecute, isPending } = useUnifiedTransaction();
 
   const createPost = useCallback(async (input: CreatePostInput) => {
     assertConfigured();
@@ -57,13 +57,10 @@ export function useCreatePost() {
 
     tx.setGasBudget(20_000_000);
 
-    const res = await signAndExecute.mutateAsync({
-      transaction: tx,
-      // options: { showEffects: true, showObjectChanges: true },
-    });
+    const res = await signAndExecute({ transaction: tx });
 
     return res;
   }, [signAndExecute]);
 
-  return { createPost, isPending: signAndExecute.isPending } as const;
+  return { createPost, isPending } as const;
 }

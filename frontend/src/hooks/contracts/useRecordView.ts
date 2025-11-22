@@ -2,8 +2,8 @@
 
 import { useCallback } from 'react';
 import { Transaction } from '@mysten/sui/transactions';
-import { useSignAndExecuteTransaction } from '@mysten/dapp-kit';
 import { CONTENT_PACKAGE_ID, SUI_CLOCK_OBJECT_ID } from '@/lib/constants';
+import { useUnifiedTransaction } from '@/hooks/useUnifiedTransaction';
 
 function assertConfigured() {
   if (!CONTENT_PACKAGE_ID || CONTENT_PACKAGE_ID.startsWith('REPLACE_WITH')) {
@@ -12,7 +12,7 @@ function assertConfigured() {
 }
 
 export function useRecordView() {
-  const signAndExecute = useSignAndExecuteTransaction();
+  const { signAndExecute, isPending } = useUnifiedTransaction();
 
   const recordView = useCallback(async (postId: string, registryId: string) => {
     assertConfigured();
@@ -31,13 +31,10 @@ export function useRecordView() {
 
     tx.setGasBudget(8_000_000);
 
-    const res = await signAndExecute.mutateAsync({
-      transaction: tx,
-      // options: { showEffects: true },
-    });
+    const res = await signAndExecute({ transaction: tx });
 
     return res;
   }, [signAndExecute]);
 
-  return { recordView, isPending: signAndExecute.isPending } as const;
+  return { recordView, isPending } as const;
 }

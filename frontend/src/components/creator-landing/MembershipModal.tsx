@@ -3,12 +3,13 @@
 import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Check, X } from 'lucide-react';
+import { Check, X, Wallet } from 'lucide-react';
 import { useCurrentAccount } from '@mysten/dapp-kit';
 import { toast } from 'sonner';
 
 import { TierDisplay } from '@/types/creator-landing';
 import { usePurchaseSubscription } from '@/hooks/contracts/usePurchaseSubscription';
+import { useZkLogin } from '@/hooks/useZkLogin';
 
 interface MembershipModalProps {
   open: boolean;
@@ -28,13 +29,24 @@ export default function MembershipModal({
   subscriptionObjectId,
 }: MembershipModalProps) {
   const account = useCurrentAccount();
+  const { session: zkLoginSession } = useZkLogin();
   const [selectedTier, setSelectedTier] = useState<string | null>(null);
   const [subscribing, setSubscribing] = useState(false);
   const { purchase, isPending } = usePurchaseSubscription();
+  
+  const hasWallet = !!account;
+  const hasZkLogin = !!zkLoginSession;
+  const canTransact = hasWallet;
 
   const handleSubscribe = async (tier: TierDisplay) => {
-    if (!account) {
-      toast.error('Please connect your wallet to subscribe');
+    if (!canTransact) {
+      if (hasZkLogin) {
+        toast.error('Please connect a wallet to make transactions', {
+          description: 'zkLogin is for viewing content. Transactions require a wallet.',
+        });
+      } else {
+        toast.error('Please connect your wallet to subscribe');
+      }
       return;
     }
     if (!subscriptionObjectId) {
@@ -146,7 +158,15 @@ export default function MembershipModal({
           </div>
         )}
 
-        <div className="mt-6 pt-6 border-t">
+        <div className="mt-6 pt-6 border-t space-y-3">
+          {hasZkLogin && !hasWallet && (
+            <div className="flex items-start gap-2 text-sm bg-amber-50 border border-amber-200 rounded-lg p-3">
+              <Wallet className="h-4 w-4 text-amber-600 mt-0.5 flex-shrink-0" />
+              <p className="text-amber-800">
+                <strong>Wallet Required:</strong> You&apos;re signed in with zkLogin. To purchase memberships, please connect a Sui wallet.
+              </p>
+            </div>
+          )}
           <div className="flex items-start gap-2 text-sm text-muted-foreground">
             <Check className="h-4 w-4 text-green-500 mt-0.5" />
             <p>
