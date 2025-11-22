@@ -94,7 +94,7 @@ module creator_profile::creator_landing {
     
     /// Create a new landing page configuration
     /// walrus_blob_id: Walrus blob ID containing the landing page JSON
-    public fun create_landing_page(
+    public entry fun create_landing_page(
         registry: &mut LandingPageRegistry,
         creator_profile_id: ID,
         walrus_blob_id: String,
@@ -132,7 +132,7 @@ module creator_profile::creator_landing {
     }
     
     /// Update landing page configuration with new Walrus blob
-    public fun update_landing_page(
+    public entry fun update_landing_page(
         config: &mut LandingPageConfig,
         walrus_blob_id: String,
         clock: &Clock,
@@ -156,7 +156,7 @@ module creator_profile::creator_landing {
     }
     
     /// Publish landing page (make it publicly visible)
-    public fun publish_landing_page(
+    public entry fun publish_landing_page(
         config: &mut LandingPageConfig,
         clock: &Clock,
         ctx: &TxContext
@@ -174,7 +174,7 @@ module creator_profile::creator_landing {
     }
     
     /// Unpublish landing page
-    public fun unpublish_landing_page(
+    public entry fun unpublish_landing_page(
         config: &mut LandingPageConfig,
         clock: &Clock,
         ctx: &TxContext
