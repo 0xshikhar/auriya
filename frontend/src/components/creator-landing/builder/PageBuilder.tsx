@@ -154,7 +154,7 @@ export default function PageBuilder({
                 Back
               </Button>
             )}
-            <h1 className="text-xl font-semibold">{activePanel === 'layout' ? 'Layout' : 'Details'}</h1>
+            <h1 className="text font-bold">{activePanel === 'layout' ? 'Layout' : 'Details'}</h1>
             <p className="text-sm text-muted-foreground hidden md:block">
               {activePanel === 'layout' 
                 ? 'Customise the layout of your page to showcase your best work.'
@@ -171,15 +171,34 @@ export default function PageBuilder({
               <option value="unlisted">Unlisted</option>
               <option value="private">Private</option>
             </select>
-            <Button variant="outline" size="sm">
-              <Eye className="h-4 w-4 mr-2" />
-              View page
+            
+            {landingPage.isPublished && (
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => window.open(`/c/${creatorAddress}`, '_blank')}
+              >
+                <Eye className="h-4 w-4 mr-2" />
+                View Live Page
+              </Button>
+            )}
+            
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={handleSave} 
+              disabled={saving}
+            >
+              {saving ? 'Saving Draft...' : 'Save Draft'}
             </Button>
-            <Button variant="outline" size="sm" onClick={handleSave} disabled={saving}>
-              Cancel
-            </Button>
-            <Button size="sm" onClick={handlePublish} disabled={saving}>
-              {saving ? 'Saving...' : 'Save'}
+            
+            <Button 
+              size="sm" 
+              onClick={handlePublish} 
+              disabled={saving}
+              className="bg-gumroad-pink hover:bg-gumroad-pink/90 text-black font-semibold"
+            >
+              {saving ? 'Publishing...' : landingPage.isPublished ? 'Update & Publish' : 'Publish'}
             </Button>
           </div>
         </div>
