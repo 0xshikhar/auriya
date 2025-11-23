@@ -93,15 +93,15 @@
 - [] Update frontend .env with package IDs
 
 ### Frontend Integration
-- [ ] Create Walrus client (`/frontend/src/lib/walrus.ts`)
-- [ ] Create contract hooks:
-  - [ ] `useCreateProfile` - Creator profile creation
-  - [ ] `usePurchaseSubscription` - Subscription purchase
-  - [ ] `useCreatePost` - Content creation
+- [x] Create Walrus client (`/frontend/src/lib/walrus.ts`)
+- [x] Create contract hooks:
+  - [x] `useCreateProfile` - Creator profile creation
+  - [x] `usePurchaseSubscription` - Subscription purchase
+  - [x] `useCreatePost` - Content creation
 - [ ] Build Creator Dashboard pages
 - [ ] Build Fan Portal pages
 - [ ] Build Content Viewer with access gates
-
+- [ ] mysten/seal implmentation ( for storage, access control policies) - https://seal-docs.wal.app/ ( see Hack_Details.md for more details)
 ---
 
 ## 📋 To Do (Days 4-8)
@@ -118,31 +118,29 @@
   - [x] Profile setup page (`/dashboard/setup`)
   - [x] Tier configuration page (`/dashboard/tiers`)
   - [x] Content creation page (`/dashboard/content/new`)
-  - [x] Analytics view (`/dashboard/analytics`)
 - [x] **Fan Portal** (`/creators`)
   - [x] Creator discovery page (`/creators`)
   - [x] Creator profile page (`/creators/[address]`)
   - [x] Subscription purchase modal (component: `PurchaseModal`)
   - [x] Content feed (`/creators/[address]/posts`)
-- [x] **Content Viewer** (`/creators/[address]/posts/[id]`)
-  - [x] Access gate component (`AccessGate`)
-  - [x] Walrus content display (image/video/audio/file)
-  - [x] Like functionality
-  - [ ] Comment functionality
+  - [x] **Content Viewer** (`/creators/[address]/posts/[id]`)
+    - [x] Access gate component (`AccessGate`)
+    - [x] Walrus content display (image/video/audio/file)
+    - [x] Like functionality
+    - [x] Comment functionality
 
 ### Phase 6: Polish (Day 7)
-- [ ] Add loading skeletons
-- [ ] Error handling with toast notifications
-- [ ] Optimistic UI updates
-- [ ] Mobile responsive design
-- [ ] Dark mode polish
-- [ ] Accessibility improvements
+  - [x] SUIns integration (basic name resolution in UI)
+  - [x] Add loading skeletons (post viewer)
+  - [x] Error handling with toast notifications (viewer, comments, likes)
+  - [x] Optimistic UI updates (comments)
+  - [ ] Mobile responsive design (pass across pages)
+  - [ ] Accessibility improvements (labels, focus, aria)
 
 ### Phase 7: Testing (Day 7)
 - [ ] End-to-end creator flow
 - [ ] End-to-end fan flow
 - [ ] Test on mobile devices
-- [ ] Test with real Walrus uploads
 - [ ] Cross-browser testing
 
 ### Phase 8: Demo & Submission (Day 8)
