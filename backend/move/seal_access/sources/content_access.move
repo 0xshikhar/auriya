@@ -9,13 +9,15 @@ module seal_access::content_access {
     use sui::tx_context::{Self, TxContext};
     use sui::transfer;
     use sui::event;
+    use sui::clock::{Self, Clock};
+    use subscription::subscription::{Self, SubscriptionNFT};
     
     // === Errors ===
     
-    const EInsufficientTier: u8 = 0;
-    const ESubscriptionCancelled: u8 = 1;
-    const EWrongCreator: u8 = 2;
-    const ESubscriptionExpired: u8 = 3;
+    const EInsufficientTier: u64 = 0;
+    const ESubscriptionCancelled: u64 = 1;
+    const EWrongCreator: u64 = 2;
+    const ESubscriptionExpired: u64 = 3;
     
     // === Structs ===
     
@@ -29,16 +31,7 @@ module seal_access::content_access {
         created_at: u64,
     }
     
-    /// Simplified subscription NFT reference
-    /// In production, import from subscription package
-    public struct SubscriptionNFT has key, store {
-        id: UID,
-        creator: address,
-        subscriber: address,
-        tier_level: u8,
-        is_cancelled: bool,
-        expires_at: u64,
-    }
+    // Subscription NFT type is imported from `subscription::subscription::SubscriptionNFT`
     
     // === Events ===
     
@@ -58,7 +51,7 @@ module seal_access::content_access {
     public struct AccessDenied has copy, drop {
         policy_id: ID,
         subscriber: address,
-        reason: u8,
+        reason: u64,
     }
     
     // === Public Entry Functions ===
