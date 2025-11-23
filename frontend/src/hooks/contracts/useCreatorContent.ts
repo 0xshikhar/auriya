@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { getRegistryPostIds, getContentPost, ContentPostFields } from '@/lib/content';
+import { createSuiClient } from '@/lib/sui';
+import { CONTENT_PACKAGE_ID } from '@/lib/constants';
 
 export interface CreatorContentPost {
   id: string;
@@ -12,31 +14,64 @@ export interface CreatorContentPost {
  * Hook to fetch all content posts for a creator
  * Requires the creator's content registry ID
  */
-export function useCreatorContent(registryId?: string) {
+export function useCreatorContent(registryId?: string, creatorAddress?: string) {
   const [posts, setPosts] = useState<CreatorContentPost[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    console.log('🎣 [useCreatorContent] Hook triggered', { registryId });
+    console.log('🎣 [useCreatorContent] Hook triggered', { registryId, creatorAddress });
     
-    if (!registryId) {
-      console.log('⚠️ [useCreatorContent] No registry ID provided');
-      setPosts([]);
-      return;
+    async function resolveRegistryId(): Promise<string | null> {
+      if (registryId) return registryId;
+      if (!creatorAddress) return null;
+
+      // Fallback: discover registry from RegistryCreated events by this creator
+      try {
+        console.log('🧭 [useCreatorContent] Resolving registry via events for creator:', creatorAddress);
+        const client = createSuiClient();
+        const eventType = `${CONTENT_PACKAGE_ID}::content::RegistryCreated`;
+        const res = await client.queryEvents({
+          query: { MoveEventType: eventType },
+          limit: 100,
+          order: 'descending',
+        });
+        const match = (res.data as any[]).find((e: any) => {
+          const parsed: any = e.parsedJson || {};
+          const evCreator = (parsed.creator || '').toLowerCase();
+          return evCreator === creatorAddress.toLowerCase();
+        });
+        const reg = (match as any)?.parsedJson?.registry_id as string | undefined;
+        if (reg) {
+          console.log('🆔 [useCreatorContent] Discovered registry from events:', reg);
+          return reg;
+        }
+        console.warn('⚠️ [useCreatorContent] No RegistryCreated event found for creator');
+        return null;
+      } catch (e) {
+        console.warn('⚠️ [useCreatorContent] Failed to resolve registry via events:', e);
+        return null;
+      }
     }
 
     let cancelled = false;
 
     async function fetchPosts() {
-      console.log('🚀 [useCreatorContent] Starting fetch for registry:', registryId);
+      const targetRegistryId = await resolveRegistryId();
+      if (!targetRegistryId) {
+        console.log('⚠️ [useCreatorContent] No registry ID resolved');
+        setPosts([]);
+        return;
+      }
+
+      console.log('🚀 [useCreatorContent] Starting fetch for registry:', targetRegistryId);
       setIsLoading(true);
       setError(null);
       
       try {
         // Get post IDs from registry
         console.log('📋 [useCreatorContent] Fetching post IDs...');
-        const postIds = await getRegistryPostIds(registryId as string);
+        const postIds = await getRegistryPostIds(targetRegistryId);
         console.log('✅ [useCreatorContent] Got post IDs:', postIds);
 
         if (postIds.length === 0) {
@@ -90,7 +125,7 @@ export function useCreatorContent(registryId?: string) {
     return () => {
       cancelled = true;
     };
-  }, [registryId]);
+  }, [registryId, creatorAddress]);
 
   return { posts, isLoading, error, postCount: posts.length };
 }

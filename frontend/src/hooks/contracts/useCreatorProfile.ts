@@ -1,6 +1,6 @@
 "use client";
 
-import { useSuiClientQuery } from '@mysten/dapp-kit';
+import { useSuiClient, useSuiClientQuery } from '@mysten/dapp-kit';
 import { CREATOR_PROFILE_PACKAGE_ID } from '@/lib/constants';
 import { useState, useEffect } from 'react';
 
@@ -28,6 +28,7 @@ export interface CreatorProfileData {
 export function useCreatorProfile(address?: string) {
   const [profile, setProfile] = useState<CreatorProfileData | null>(null);
   const [profileObjectId, setProfileObjectId] = useState<string | null>(null);
+  const suiClient = useSuiClient();
 
   // Query owned objects to find CreatorProfile
   const { data: ownedObjects, isLoading, error } = useSuiClientQuery(
@@ -48,24 +49,51 @@ export function useCreatorProfile(address?: string) {
   );
 
   useEffect(() => {
-    if (!ownedObjects?.data || ownedObjects.data.length === 0) {
-      setProfile(null);
-      setProfileObjectId(null);
-      return;
+    async function resolveProfileViaEvents(addr: string): Promise<{ objectId: string; fields: any } | null> {
+      try {
+        const eventType = `${CREATOR_PROFILE_PACKAGE_ID}::creator_profile::ProfileCreated`;
+        const events = await suiClient.queryEvents({ query: { MoveEventType: eventType }, limit: 100, order: 'descending' });
+        const found = (events.data as any[]).find((e: any) => (e.parsedJson?.owner || '').toLowerCase() === addr.toLowerCase());
+        const id = found?.parsedJson?.profile_id as string | undefined;
+        if (!id) return null;
+        const obj = await suiClient.getObject({ id, options: { showContent: true, showType: true } });
+        const fields = (obj.data as any)?.content?.fields;
+        if (!fields) return null;
+        return { objectId: id, fields };
+      } catch {
+        return null;
+      }
     }
 
-    // Get the first profile (users should only have one)
-    const profileObj = ownedObjects.data[0];
-    const objectId = profileObj.data?.objectId;
-    const content = profileObj.data?.content as any;
+    async function load() {
+      if (!address) {
+        setProfile(null);
+        setProfileObjectId(null);
+        return;
+      }
 
-    if (!content?.fields) {
-      setProfile(null);
-      setProfileObjectId(null);
-      return;
-    }
+      let objectId: string | undefined;
+      let fields: any | undefined;
 
-    const fields = content.fields;
+      if (!ownedObjects?.data || ownedObjects.data.length === 0) {
+        const fallback = await resolveProfileViaEvents(address);
+        if (!fallback) {
+          setProfile(null);
+          setProfileObjectId(null);
+          return;
+        }
+        objectId = fallback.objectId;
+        fields = fallback.fields;
+      } else {
+        const profileObj = ownedObjects.data[0];
+        objectId = profileObj.data?.objectId;
+        fields = (profileObj.data?.content as any)?.fields;
+        if (!fields) {
+          setProfile(null);
+          setProfileObjectId(null);
+          return;
+        }
+      }
     
     // Helper to read Option<T> encoded by Sui as { fields: { vec: [value?] } } or sometimes { fields: { some: value } }
     const readOption = (opt: any): any | undefined => {
@@ -92,7 +120,10 @@ export function useCreatorProfile(address?: string) {
       suinsName: readOption(fields.suins_name),
       socialLinks: fields.social_links || [],
     });
-  }, [ownedObjects]);
+  }
+
+    load();
+  }, [address, ownedObjects, suiClient]);
 
   return {
     profile,

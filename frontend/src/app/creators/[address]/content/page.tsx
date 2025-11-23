@@ -21,7 +21,7 @@ function CreatorContentInner() {
   console.log('🔑 [CreatorContentPage] Current account:', account?.address);
   
   const { profile, isLoading: profileLoading } = useCreatorProfile(creatorAddress);
-  const { posts, isLoading: postsLoading } = useCreatorContent(profile?.contentRegistryId);
+  const { posts, isLoading: postsLoading } = useCreatorContent(profile?.contentRegistryId, creatorAddress);
   const { subscriptions } = useSubscriptions(account?.address);
   
   console.log('📊 [CreatorContentPage] Profile:', profile);
