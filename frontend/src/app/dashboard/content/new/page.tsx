@@ -1,18 +1,24 @@
 "use client";
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import WalrusUploader from '@/components/walrus/WalrusUploader';
 import { useCreatePost } from '@/hooks/contracts/useCreatePost';
 import { useCreateContentRegistry } from '@/hooks/contracts/useCreateContentRegistry';
+import { useLinkContentRegistry } from '@/hooks/contracts/useLinkContentRegistry';
+import { useCreatorProfile } from '@/hooks/contracts/useCreatorProfile';
 import { DEFAULT_CONTENT_REGISTRY_ID } from '@/lib/constants';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { FileText, Image as ImageIcon, Video, Music, File, Lock, CheckCircle2, AlertCircle, Upload } from 'lucide-react';
 import { toast } from 'sonner';
+import { useCurrentAccount } from '@mysten/dapp-kit';
 
 export default function NewContentPage() {
+  const currentAccount = useCurrentAccount();
+  const { profile } = useCreatorProfile(currentAccount?.address);
+  
   const [registryId, setRegistryId] = useState<string>(DEFAULT_CONTENT_REGISTRY_ID);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -24,6 +30,15 @@ export default function NewContentPage() {
 
   const { createPost, isPending } = useCreatePost();
   const { createRegistry, isPending: creatingRegistry } = useCreateContentRegistry();
+  const { linkRegistry, isPending: linkingRegistry } = useLinkContentRegistry();
+
+  // Load registry from profile if available
+  useEffect(() => {
+    if (profile?.contentRegistryId && !registryId) {
+      setRegistryId(profile.contentRegistryId);
+      toast.info('Loaded registry from your profile');
+    }
+  }, [profile?.contentRegistryId]);
 
   // Allow empty registryId (we will auto-create one on submit)
   const canSubmit = useMemo(() => !!blobId && !!title, [blobId, title]);
@@ -32,16 +47,47 @@ export default function NewContentPage() {
     e.preventDefault();
     setError(null);
     setTxDigest(null);
+    
     try {
-      let targetRegistry = registryId;
+      let targetRegistry = registryId.trim();
+      let isNewRegistry = false;
+      
+      // Validate or create registry
       if (!targetRegistry) {
-        // Auto-create a registry if not provided
-        const { registryId: newId } = await createRegistry();
-        if (!newId) throw new Error('Failed to create registry (no object id)');
-        setRegistryId(newId);
-        targetRegistry = newId;
-        toast.success('Content registry created');
+        toast.info('Creating content registry...');
+        const result = await createRegistry();
+        
+        if (!result?.registryId) {
+          throw new Error('Failed to create registry - no object ID returned');
+        }
+        
+        targetRegistry = result.registryId;
+        setRegistryId(targetRegistry);
+        isNewRegistry = true;
+        toast.success(`Registry created: ${targetRegistry.slice(0, 8)}...`);
+        
+        // Link registry to profile if available
+        if (profile?.objectId && isNewRegistry) {
+          try {
+            toast.info('Linking registry to your profile...');
+            await linkRegistry(profile.objectId, targetRegistry);
+            toast.success('Registry linked to profile');
+          } catch (linkError: any) {
+            console.warn('Failed to link registry to profile:', linkError);
+            // Non-fatal error, continue with post creation
+          }
+        }
+        
+        // Small delay to ensure registry is fully indexed
+        await new Promise(resolve => setTimeout(resolve, 1500));
       }
+      
+      // Validate registry ID format
+      if (!targetRegistry.startsWith('0x') || targetRegistry.length < 10) {
+        throw new Error('Invalid registry ID format. Must be a valid Sui object ID.');
+      }
+      
+      toast.info('Publishing post...');
       const res = await createPost({
         registryId: targetRegistry,
         title,
@@ -50,12 +96,22 @@ export default function NewContentPage() {
         walrusBlobId: blobId,
         requiredTier,
       });
+      
       // @ts-ignore
-      setTxDigest(res?.digest || null);
-      toast.success('Post published');
+      const digest = res?.digest || null;
+      setTxDigest(digest);
+      toast.success('Post published successfully!');
+      
+      // Reset form
+      setTitle('');
+      setDescription('');
+      setBlobId('');
+      
     } catch (e: any) {
-      setError(e?.message || 'Failed to create post');
-      toast.error(e?.message || 'Failed to create post');
+      console.error('Content creation error:', e);
+      const errorMsg = e?.message || 'Failed to create post';
+      setError(errorMsg);
+      toast.error(errorMsg);
     }
   };
 

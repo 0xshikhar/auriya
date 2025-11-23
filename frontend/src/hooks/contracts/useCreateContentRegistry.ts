@@ -2,9 +2,8 @@
 
 import { useCallback } from 'react';
 import { Transaction } from '@mysten/sui/transactions';
-import { useSignAndExecuteTransaction } from '@mysten/dapp-kit';
+import { useSignAndExecuteTransaction, useSuiClient } from '@mysten/dapp-kit';
 import { CONTENT_PACKAGE_ID } from '@/lib/constants';
-import { createSuiClient } from '@/lib/sui';
 
 function assertConfigured() {
   if (!CONTENT_PACKAGE_ID || CONTENT_PACKAGE_ID.startsWith('REPLACE_WITH')) {
@@ -14,6 +13,7 @@ function assertConfigured() {
 
 export function useCreateContentRegistry() {
   const signAndExecute = useSignAndExecuteTransaction();
+  const suiClient = useSuiClient();
 
   const createRegistry = useCallback(async () => {
     assertConfigured();
@@ -27,23 +27,50 @@ export function useCreateContentRegistry() {
 
     const res = await signAndExecute.mutateAsync({ transaction: tx });
 
-    // Enrich with objectChanges via RPC using digest
-    const client = createSuiClient();
+    // Wait for transaction to be indexed and fetch object changes
     const digest = (res as any)?.digest as string | undefined;
-    let objectChanges: any[] | undefined;
-    if (digest) {
-      const txInfo = await client.getTransactionBlock({ digest, options: { showObjectChanges: true } });
-      objectChanges = (txInfo as any)?.objectChanges as any[] | undefined;
+    if (!digest) {
+      throw new Error('Transaction digest not found in response');
     }
 
-    const created = (objectChanges || [])?.find(
-      (c) => c.type === 'created' && typeof c.objectType === 'string' && c.objectType.endsWith('::content::ContentRegistry')
+    // Poll for transaction with retries (transaction might not be indexed immediately)
+    let txInfo: any;
+    let retries = 5;
+    while (retries > 0) {
+      try {
+        txInfo = await suiClient.getTransactionBlock({ 
+          digest, 
+          options: { showObjectChanges: true } 
+        });
+        if (txInfo?.objectChanges) break;
+      } catch (e) {
+        console.warn('Waiting for transaction to be indexed...', e);
+      }
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      retries--;
+    }
+
+    if (!txInfo?.objectChanges) {
+      throw new Error('Failed to fetch transaction object changes after retries');
+    }
+
+    const objectChanges = txInfo.objectChanges as any[];
+    const created = objectChanges.find(
+      (c) => c.type === 'created' && 
+             typeof c.objectType === 'string' && 
+             c.objectType.includes('::content::ContentRegistry')
     );
 
-    // Return original result but also include objectChanges for callers expecting it
-    const enriched: any = { ...res, objectChanges };
-    return { tx: enriched, registryId: created?.objectId as string | undefined };
-  }, [signAndExecute]);
+    if (!created?.objectId) {
+      throw new Error('ContentRegistry object ID not found in transaction');
+    }
+
+    return { 
+      tx: { ...res, objectChanges }, 
+      registryId: created.objectId as string,
+      digest 
+    };
+  }, [signAndExecute, suiClient]);
 
   return { createRegistry, isPending: signAndExecute.isPending } as const;
 }

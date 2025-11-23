@@ -12,6 +12,7 @@ export interface CreatorProfileData {
   avatarWalrusId: string;
   bannerWalrusId: string;
   category: string;
+  contentRegistryId?: string;
   totalSubscribers: number;
   totalRevenueMist: number;
   createdAt: number;
@@ -75,6 +76,7 @@ export function useCreatorProfile(address?: string) {
       avatarWalrusId: fields.avatar_walrus_id || '',
       bannerWalrusId: fields.banner_walrus_id || '',
       category: fields.category || '',
+      contentRegistryId: fields.content_registry_id?.fields?.some || undefined,
       totalSubscribers: parseInt(fields.total_subscribers || '0'),
       totalRevenueMist: parseInt(fields.total_revenue_mist || '0'),
       createdAt: parseInt(fields.created_at || '0'),

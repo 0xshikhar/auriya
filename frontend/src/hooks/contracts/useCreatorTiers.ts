@@ -17,9 +17,6 @@ export interface CreatorTier {
  * Hook to fetch creator's subscription tiers
  */
 export function useCreatorTiers(creatorAddress?: string) {
-  console.log('🔍 [useCreatorTiers] Starting fetch for address:', creatorAddress);
-  console.log('🔍 [useCreatorTiers] SUBSCRIPTION_PACKAGE_ID:', SUBSCRIPTION_PACKAGE_ID);
-
   // Step 1: find the creator's subscription object ID from events (shared object isn't owned by the creator)
   const {
     data: events,
@@ -39,8 +36,10 @@ export function useCreatorTiers(creatorAddress?: string) {
     } as any,
     {
       enabled: !!creatorAddress && !!SUBSCRIPTION_PACKAGE_ID,
+
+      refetchOnMount: true,
+      refetchOnWindowFocus: false,
       refetchInterval: 10000,
-      staleTime: 0,
     }
   );
 
@@ -56,8 +55,8 @@ export function useCreatorTiers(creatorAddress?: string) {
   const discoveredSubscriptionId: string | undefined =
     typeof subIdRaw === 'string' ? subIdRaw : subIdRaw?.id;
 
-  console.log('📡 [useCreatorTiers] Events found:', allEvents.length, 'matching:', matching.length);
-  console.log('📎 [useCreatorTiers] Discovered subscription object ID:', discoveredSubscriptionId);
+//   console.log('📡 [useCreatorTiers] Events found:', allEvents.length, 'matching:', matching.length);
+//   console.log('📎 [useCreatorTiers] Discovered subscription object ID:', discoveredSubscriptionId);
 
   // Fallback: search transactions that called create_tiers from this address
   // This runs in parallel with events query since events may have indexing delay
@@ -77,16 +76,16 @@ export function useCreatorTiers(creatorAddress?: string) {
     } as any,
     {
       enabled: !!creatorAddress && !!SUBSCRIPTION_PACKAGE_ID,
-      refetchInterval: 12_000,
-      staleTime: 0,
+      refetchOnMount: true,
+      refetchOnWindowFocus: false,
     }
   );
 
-  console.log('🔎 [useCreatorTiers] Transaction query result:', {
-    txCount: (txs as any)?.data?.length || 0,
-    loadingTxs,
-    txsError: txsError?.message,
-  });
+//   console.log('🔎 [useCreatorTiers] Transaction query result:', {
+//     txCount: (txs as any)?.data?.length || 0,
+//     loadingTxs,
+//     txsError: txsError?.message,
+//   });
 
   let discoveredFromTx: string | undefined = undefined;
   const txData = (txs as any)?.data as any[] | undefined;
@@ -104,9 +103,9 @@ export function useCreatorTiers(creatorAddress?: string) {
   }
 
   const finalSubscriptionId = discoveredSubscriptionId || discoveredFromTx;
-  if (!discoveredSubscriptionId && discoveredFromTx) {
-    console.log('🧭 [useCreatorTiers] Fallback discovered subscription object via txs:', discoveredFromTx);
-  }
+//   if (!discoveredSubscriptionId && discoveredFromTx) {
+//     console.log('🧭 [useCreatorTiers] Fallback discovered subscription object via txs:', discoveredFromTx);
+//   }
 
   // Step 2: fetch the subscription object by ID
   const {
@@ -122,8 +121,9 @@ export function useCreatorTiers(creatorAddress?: string) {
     },
     {
       enabled: !!finalSubscriptionId,
-      refetchInterval: 10_000,
-      staleTime: 0,
+
+      refetchOnMount: true,
+      refetchOnWindowFocus: false,
     }
   );
 
@@ -132,12 +132,8 @@ export function useCreatorTiers(creatorAddress?: string) {
 
   if (subscriptionObject?.content?.dataType === 'moveObject') {
     const fields = (subscriptionObject.content as any).fields;
-    console.log('✅ [useCreatorTiers] Loaded subscription object:', subscriptionObject?.objectId);
-    console.log('📋 [useCreatorTiers] Full fields:', JSON.stringify(fields, null, 2));
-
     // The JSON shape for vector<SubscriptionTier> is an array of structs with a `fields` object
     const tiersVector = (fields?.tiers as any[]) || [];
-    console.log('🎯 [useCreatorTiers] tiersVector length:', tiersVector.length);
 
     for (let i = 0; i < tiersVector.length; i++) {
       const tierNode = tiersVector[i];
@@ -165,7 +161,7 @@ export function useCreatorTiers(creatorAddress?: string) {
 
     console.log('🎉 [useCreatorTiers] Parsed tiers:', tiers);
   } else if (finalSubscriptionId) {
-    console.warn('⚠️ [useCreatorTiers] Subscription object not in expected shape for ID:', finalSubscriptionId);
+    // console.warn('⚠️ [useCreatorTiers] Subscription object not in expected shape for ID:', finalSubscriptionId);
   }
 
   const isLoading = loadingEvents || loadingTxs || loadingObject;

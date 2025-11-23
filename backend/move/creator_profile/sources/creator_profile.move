@@ -25,6 +25,7 @@ module creator_profile::creator_profile {
         banner_walrus_id: String,       // Walrus blob ID for banner
         social_links: vector<String>,
         category: String,               // Art, Music, Writing, etc.
+        content_registry_id: Option<ID>, // Optional link to ContentRegistry
         created_at: u64,                // Unix timestamp in milliseconds
         total_subscribers: u64,
         total_revenue_mist: u64,        // Total revenue in MIST (1 SUI = 1B MIST)
@@ -115,6 +116,7 @@ module creator_profile::creator_profile {
             banner_walrus_id,
             social_links: vector::empty(),
             category,
+            content_registry_id: option::none(),
             created_at: clock::timestamp_ms(clock),
             total_subscribers: 0,
             total_revenue_mist: 0,
@@ -194,6 +196,16 @@ module creator_profile::creator_profile {
         });
     }
     
+    /// Link a content registry to the profile
+    public fun link_content_registry(
+        profile: &mut CreatorProfile,
+        registry_id: ID,
+        ctx: &TxContext
+    ) {
+        assert!(profile.owner == tx_context::sender(ctx), ENotOwner);
+        profile.content_registry_id = option::some(registry_id);
+    }
+    
     // === Public Mutative Functions (For Cross-Module Access) ===
     
     /// Increment subscriber count (called by subscription module)
@@ -261,6 +273,10 @@ module creator_profile::creator_profile {
     
     public fun get_social_links(profile: &CreatorProfile): &vector<String> {
         &profile.social_links
+    }
+    
+    public fun get_content_registry_id(profile: &CreatorProfile): Option<ID> {
+        profile.content_registry_id
     }
     
     // === Test-Only Functions ===

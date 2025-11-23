@@ -1,14 +1,39 @@
 "use client";
 
 import Link from 'next/link';
-import { useCurrentAccount } from '@mysten/dapp-kit';
+import { useCurrentAccount, useSuiClientQuery } from '@mysten/dapp-kit';
 import { BarChart3, FileText, Settings, TrendingUp, Users, DollarSign, Wallet, CheckCircle2, Sparkles } from 'lucide-react';
 import { startZkLogin } from '@/lib/enoki';
 import { useCreatorProfile } from '@/hooks/contracts/useCreatorProfile';
+import { useCreatorTiers } from '@/hooks/contracts/useCreatorTiers';
+import { useCreatorContent } from '@/hooks/contracts/useCreatorContent';
 
 export default function DashboardPage() {
   const account = useCurrentAccount();
   const { profile, hasProfile, isLoading: profileLoading } = useCreatorProfile(account?.address);
+  const { tiers, subscriptionObjectId } = useCreatorTiers(account?.address);
+  const { postCount, posts } = useCreatorContent(profile?.contentRegistryId);
+
+  // Fetch subscription object to get real stats
+  const { data: subData } = useSuiClientQuery(
+    'getObject',
+    {
+      id: subscriptionObjectId!,
+      options: { showContent: true },
+    },
+    {
+      enabled: !!subscriptionObjectId,
+    }
+  );
+
+  const subFields = (subData as any)?.data?.content?.fields;
+  const activeSubscribers = parseInt(subFields?.active_subscriber_count || '0');
+  const totalRevenueMist = BigInt(subFields?.total_revenue_mist || '0');
+  const totalRevenueSui = Number(totalRevenueMist) / 1_000_000_000;
+  
+  // Calculate total views and likes from posts
+  const totalViews = posts.reduce((sum, p) => sum + (parseInt(String(p.fields?.views || 0)) || 0), 0);
+  const totalLikes = posts.reduce((sum, p) => sum + (parseInt(String(p.fields?.likes || 0)) || 0), 0);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -40,7 +65,7 @@ export default function DashboardPage() {
               <span className="text-gray-600 text-sm font-medium">Total Sales</span>
               <DollarSign className="w-5 h-5 text-gumroad-pink" />
             </div>
-            <div className="text-3xl font-bold text-black">0 SUI</div>
+            <div className="text-3xl font-bold text-black">{totalRevenueSui.toFixed(2)} SUI</div>
             <div className="text-sm text-gray-500 mt-1">95% revenue share</div>
           </div>
 
@@ -49,26 +74,28 @@ export default function DashboardPage() {
               <span className="text-gray-600 text-sm font-medium">NFT Subscribers</span>
               <Users className="w-5 h-5 text-gumroad-pink" />
             </div>
-            <div className="text-3xl font-bold text-black">0</div>
+            <div className="text-3xl font-bold text-black">{activeSubscribers}</div>
             <div className="text-sm text-gray-500 mt-1">Active memberships</div>
           </div>
 
-          <div className="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-lg transition">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-gray-600 text-sm font-medium">Content Posts</span>
-              <FileText className="w-5 h-5 text-gumroad-pink" />
+          <Link href="/dashboard/content" className="group">
+            <div className="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-lg transition cursor-pointer h-full">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-gray-600 text-sm font-medium">Content Posts</span>
+                <FileText className="w-5 h-5 text-gumroad-pink" />
+              </div>
+              <div className="text-3xl font-bold text-black">{postCount}</div>
+              <div className="text-sm text-gray-500 mt-1">Stored on Walrus</div>
             </div>
-            <div className="text-3xl font-bold text-black">0</div>
-            <div className="text-sm text-gray-500 mt-1">Stored on Walrus</div>
-          </div>
+          </Link>
 
           <div className="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-lg transition">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-gray-600 text-sm font-medium">Profile Views</span>
+              <span className="text-gray-600 text-sm font-medium">Total Engagement</span>
               <TrendingUp className="w-5 h-5 text-gumroad-pink" />
             </div>
-            <div className="text-3xl font-bold text-black">0</div>
-            <div className="text-sm text-gray-500 mt-1">This month</div>
+            <div className="text-3xl font-bold text-black">{totalViews + totalLikes}</div>
+            <div className="text-sm text-gray-500 mt-1">{totalViews} views, {totalLikes} likes</div>
           </div>
         </div>
 
@@ -150,21 +177,21 @@ export default function DashboardPage() {
         <div className="mb-8">
           <h2 className="text-2xl font-bold text-black mb-4">Content & Engagement</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Link href="/dashboard/content/new" className="group">
+            <Link href="/dashboard/content" className="group">
               <div className={`bg-white border border-gray-200 rounded-xl p-6 hover:shadow-lg transition ${
                 hasProfile ? '' : 'opacity-60 pointer-events-none'
               }`}>
                 <div className="w-12 h-12 bg-gumroad-pink rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition">
                   <FileText className="w-6 h-6 text-black" />
                 </div>
-                <h3 className="text-xl font-bold text-black mb-2">Post Content</h3>
+                <h3 className="text-xl font-bold text-black mb-2">Your Content</h3>
                 <p className="text-gray-600 mb-4">
                   {hasProfile
-                    ? 'Upload to Walrus, set tier access, publish gated content.'
+                    ? `View and manage your ${postCount} posted content on Walrus.`
                     : 'Create your profile first to start posting content.'}
                 </p>
                 <span className="text-black font-medium group-hover:text-gumroad-pink transition">
-                  {hasProfile ? 'Create post →' : 'Locked'}
+                  {hasProfile ? 'View content →' : 'Locked'}
                 </span>
               </div>
             </Link>

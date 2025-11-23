@@ -150,16 +150,16 @@ export default function TiersPage() {
   const tierColors = ['bg-amber-100 border-amber-300', 'bg-gray-100 border-gray-300', 'bg-yellow-100 border-yellow-300'];
 
   // Show loading state
-  if (loadingTiers) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <Loader2 className="h-12 w-12 animate-spin mx-auto mb-4 text-gumroad-pink" />
-          <p className="text-gray-600">Loading your tiers...</p>
-        </div>
-      </div>
-    );
-  }
+  // if (loadingTiers) {
+  //   return (
+  //     <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+  //       <div className="text-center">
+  //         <Loader2 className="h-12 w-12 animate-spin mx-auto mb-4 text-gumroad-pink" />
+  //         <p className="text-gray-600">Loading your tiers...</p>
+  //       </div>
+  //     </div>
+  //   );
+  // }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -177,7 +177,7 @@ export default function TiersPage() {
               <p className="text-lg font-semibold text-blue-900 mb-1">Tiers Already Created</p>
               <p className="text-sm text-blue-700 mb-2">
                 You have {existingTiers.length} tier{existingTiers.length !== 1 ? 's' : ''} configured. 
-                The smart contract currently does not support updating tiers after creation.
+                {/* The smart contract currently does not support updating tiers after creation. */}
               </p>
               <p className="text-xs text-blue-600 break-all">Subscription Object ID: {subscriptionObjectId}</p>
             </div>
