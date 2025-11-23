@@ -141,12 +141,13 @@ module seal_access::content_access {
     public fun can_access(
         policy: &AccessPolicy,
         subscription_nft: &SubscriptionNFT,
+        c: &Clock,
         ctx: &TxContext
     ): bool {
         let subscriber = tx_context::sender(ctx);
         
         // Check 1: Subscription must be for the same creator
-        if (subscription_nft.creator != policy.creator) {
+        if (subscription::get_creator(subscription_nft) != policy.creator) {
             event::emit(AccessDenied {
                 policy_id: object::id(policy),
                 subscriber,
@@ -156,17 +157,10 @@ module seal_access::content_access {
         };
         
         // Check 2: Subscription must not be cancelled
-        if (subscription_nft.is_cancelled) {
-            event::emit(AccessDenied {
-                policy_id: object::id(policy),
-                subscriber,
-                reason: ESubscriptionCancelled,
-            });
-            return false
-        };
+        // (no explicit is_cancelled flag in real NFT)
         
         // Check 3: Subscription tier must be sufficient
-        if (subscription_nft.tier_level < policy.required_tier) {
+        if (subscription::get_tier_id(subscription_nft) < policy.required_tier) {
             event::emit(AccessDenied {
                 policy_id: object::id(policy),
                 subscriber,
@@ -175,22 +169,21 @@ module seal_access::content_access {
             return false
         };
         
-        // Check 4: Subscription must not be expired (if expiry is set)
-        // Note: expires_at = 0 means no expiry
-        // if (subscription_nft.expires_at > 0 && subscription_nft.expires_at < current_time) {
-        //     event::emit(AccessDenied {
-        //         policy_id: object::id(policy),
-        //         subscriber,
-        //         reason: ESubscriptionExpired,
-        //     });
-        //     return false
-        // };
+        // Check 4: Subscription must not be expired
+        if (!(clock::timestamp_ms(c) < subscription::get_expires_at(subscription_nft))) {
+            event::emit(AccessDenied {
+                policy_id: object::id(policy),
+                subscriber,
+                reason: ESubscriptionExpired,
+            });
+            return false
+        };
         
         // All checks passed - grant access
         event::emit(AccessGranted {
             policy_id: object::id(policy),
             subscriber,
-            tier_level: subscription_nft.tier_level,
+            tier_level: subscription::get_tier_id(subscription_nft),
         });
         
         true
