@@ -23,8 +23,8 @@ export default function LivePreview({ landingPage }: LivePreviewProps) {
     .filter((section) => section.enabled)
     .sort((a, b) => a.order - b.order);
 
-  // Get tiers from the creator's subscription contract
-  const { tiers: creatorTiers } = useCreatorTiers(landingPage.creatorAddress);
+  // Get tiers and subscription object id from the creator's subscription contract
+  const { tiers: creatorTiers, subscriptionObjectId } = useCreatorTiers(landingPage.creatorAddress);
   
   // Convert to TierDisplay format for the modal
   const tiers = creatorTiers.map(tier => ({
@@ -34,6 +34,7 @@ export default function LivePreview({ landingPage }: LivePreviewProps) {
     currency: tier.currency,
     benefits: tier.benefits,
     highlighted: false,
+    tierId: tier.tierId,
   }));
 
   const handleMembershipClick = () => {
@@ -243,6 +244,7 @@ export default function LivePreview({ landingPage }: LivePreviewProps) {
         creatorAddress={landingPage.creatorAddress || ''}
         creatorName={header.displayName || 'Creator'}
         tiers={tiers}
+        subscriptionObjectId={subscriptionObjectId}
       />
     </div>
   );
