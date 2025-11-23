@@ -1,16 +1,68 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useCreateTiers, TierInput } from '@/hooks/contracts/useCreateTiers';
-import { Plus, Trash2, DollarSign, Calendar, Tag, CheckCircle2, AlertCircle } from 'lucide-react';
+import { useCreatorTiers } from '@/hooks/contracts/useCreatorTiers';
+import { Plus, Trash2, DollarSign, Calendar, Tag, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
+import { useCurrentAccount } from '@mysten/dapp-kit';
+import { toast } from 'sonner';
 
 export default function TiersPage() {
+  const currentAccount = useCurrentAccount();
   const { createTiers, isPending } = useCreateTiers();
+  const { tiers: existingTiers, isLoading: loadingTiers, subscriptionObjectId, refetch } = useCreatorTiers(currentAccount?.address);
+  
+  console.log('🎨 [TiersPage] Render', {
+    address: currentAccount?.address,
+    existingTiersCount: existingTiers.length,
+    loadingTiers,
+    subscriptionObjectId,
+  });
+  
   const [tiers, setTiers] = useState<TierInput[]>([
     { name: 'Bronze', priceSui: 0.1, durationDays: 30 },
   ]);
   const [resultId, setResultId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [hasFetchedTiers, setHasFetchedTiers] = useState(false);
+
+  // Pre-fill form with existing tiers
+  useEffect(() => {
+    console.log('🔄 [TiersPage] useEffect triggered', {
+      existingTiersLength: existingTiers.length,
+      hasFetchedTiers,
+      subscriptionObjectId,
+    });
+
+    if (existingTiers.length > 0 && !hasFetchedTiers) {
+      console.log('✅ [TiersPage] Pre-filling form with existing tiers:', existingTiers);
+      
+      const tierInputs: TierInput[] = existingTiers.map(tier => ({
+        name: tier.name,
+        priceSui: parseFloat(tier.price),
+        durationDays: tier.duration,
+      }));
+      
+      console.log('📝 [TiersPage] Tier inputs:', tierInputs);
+      setTiers(tierInputs);
+      setHasFetchedTiers(true);
+      
+      toast.success(`Loaded ${existingTiers.length} existing tier${existingTiers.length !== 1 ? 's' : ''}`, {
+        description: existingTiers.map(t => t.name).join(', '),
+      });
+    }
+  }, [existingTiers, hasFetchedTiers, subscriptionObjectId]);
+
+  // Show error toast if there's an error from the query
+  useEffect(() => {
+    if (error) {
+      console.error('❌ [TiersPage] Error loading tiers:', error);
+      const errorMsg = typeof error === 'string' ? error : (error as any)?.message || 'Unknown error';
+      toast.error('Failed to load tiers', {
+        description: errorMsg,
+      });
+    }
+  }, [error]);
 
   const addTier = () => setTiers((t) => [...t, { name: '', priceSui: 0, durationDays: 30 }]);
   const removeTier = (i: number) => setTiers((t) => t.filter((_, idx) => idx !== i));
@@ -24,24 +76,90 @@ export default function TiersPage() {
     setError(null);
     setResultId(null);
 
-    for (const t of tiers) {
-      if (!t.name.trim()) { setError('Tier name cannot be empty'); return; }
-      if (!(t.priceSui > 0)) { setError('Price must be greater than 0'); return; }
-      if (!(t.durationDays > 0)) { setError('Duration must be greater than 0'); return; }
+    console.log('🚀 [TiersPage] Submit triggered', { tiers, subscriptionObjectId });
+
+    // Check if tiers already exist
+    if (subscriptionObjectId) {
+      const errorMsg = 'You already have tiers created. The contract does not support updating tiers yet.';
+      console.warn('⚠️ [TiersPage]', errorMsg);
+      setError(errorMsg);
+      toast.error('Tiers Already Exist', {
+        description: errorMsg,
+      });
+      return;
     }
+
+    // Validation
+    for (const t of tiers) {
+      if (!t.name.trim()) {
+        const msg = 'Tier name cannot be empty';
+        setError(msg);
+        toast.error('Validation Error', { description: msg });
+        return;
+      }
+      if (!(t.priceSui > 0)) {
+        const msg = 'Price must be greater than 0';
+        setError(msg);
+        toast.error('Validation Error', { description: msg });
+        return;
+      }
+      if (!(t.durationDays > 0)) {
+        const msg = 'Duration must be greater than 0';
+        setError(msg);
+        toast.error('Validation Error', { description: msg });
+        return;
+      }
+    }
+
+    console.log('✅ [TiersPage] Validation passed, creating tiers...');
+    toast.loading('Creating tiers...', { id: 'create-tiers' });
 
     try {
       const res = await createTiers(tiers);
+      console.log('📦 [TiersPage] Create tiers response:', res);
+      
       const created = ((res as any)?.objectChanges as any[] | undefined)?.find(
         (c) => c.type === 'created' && typeof c.objectType === 'string' && c.objectType.endsWith('::subscription::CreatorSubscriptions')
       );
-      setResultId(created?.objectId || null);
+      
+      const objectId = created?.objectId || null;
+      console.log('🎉 [TiersPage] Tiers created successfully!', { objectId });
+      
+      setResultId(objectId);
+      toast.success('Tiers Created Successfully!', {
+        id: 'create-tiers',
+        description: `Created ${tiers.length} tier${tiers.length !== 1 ? 's' : ''}`,
+      });
+      
+      // Refetch to update the UI
+      setTimeout(() => {
+        console.log('🔄 [TiersPage] Refetching tiers...');
+        refetch();
+      }, 1000);
     } catch (e: any) {
-      setError(e?.message || 'Failed to create tiers');
+      const errorMsg = e?.message || 'Failed to create tiers';
+      console.error('❌ [TiersPage] Error creating tiers:', e);
+      setError(errorMsg);
+      toast.error('Failed to Create Tiers', {
+        id: 'create-tiers',
+        description: errorMsg,
+      });
     }
   };
 
   const tierColors = ['bg-amber-100 border-amber-300', 'bg-gray-100 border-gray-300', 'bg-yellow-100 border-yellow-300'];
+
+  // Show loading state
+  if (loadingTiers) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-12 w-12 animate-spin mx-auto mb-4 text-gumroad-pink" />
+          <p className="text-gray-600">Loading your tiers...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -50,6 +168,21 @@ export default function TiersPage() {
           <h1 className="text-5xl font-bold text-black mb-4">NFT Subscription Tiers</h1>
           <p className="text-xl text-gray-600">Configure up to 5 membership tiers. Fans mint NFTs to subscribe, revenue flows directly to your wallet.</p>
         </div>
+
+        {/* Show existing tiers notification */}
+        {subscriptionObjectId && (
+          <div className="mb-8 p-6 bg-blue-50 border-2 border-blue-200 rounded-xl flex items-start gap-3">
+            <CheckCircle2 className="w-6 h-6 text-blue-600 flex-shrink-0 mt-0.5" />
+            <div className="flex-1">
+              <p className="text-lg font-semibold text-blue-900 mb-1">Tiers Already Created</p>
+              <p className="text-sm text-blue-700 mb-2">
+                You have {existingTiers.length} tier{existingTiers.length !== 1 ? 's' : ''} configured. 
+                The smart contract currently does not support updating tiers after creation.
+              </p>
+              <p className="text-xs text-blue-600 break-all">Subscription Object ID: {subscriptionObjectId}</p>
+            </div>
+          </div>
+        )}
 
         <div className="bg-white border-2 border-gray-200 rounded-2xl p-10 shadow-sm">
           <div className="flex items-center justify-between mb-8">
@@ -143,10 +276,10 @@ export default function TiersPage() {
 
               <button
                 type="submit"
-                disabled={isPending}
+                disabled={isPending || !!subscriptionObjectId}
                 className="px-10 py-4 bg-black text-white hover:bg-gray-800 rounded-full transition font-semibold disabled:opacity-50 disabled:cursor-not-allowed text-lg"
               >
-                {isPending ? 'Creating Tiers...' : 'Save All Tiers'}
+                {isPending ? 'Creating Tiers...' : subscriptionObjectId ? 'Tiers Already Created' : 'Save All Tiers'}
               </button>
             </div>
 
