@@ -38,23 +38,6 @@ export default function Header() {
                         <span className="text-xl font-bold text-black">Auriya</span>
           </motion.div>
         </Link>
-        
-        {/* <nav className="hidden md:flex items-center gap-8 text-sm">
-          <motion.div whileHover={{ y: -2 }}>
-            <Link href="/creators" className="text-gray-600 hover:text-black transition font-medium">
-              Discover
-            </Link>
-          </motion.div>
-          <motion.div whileHover={{ y: -2 }}>
-            <Link href="/pricing" className="text-gray-600 hover:text-black transition font-medium">
-              Pricing
-            </Link>
-          </motion.div>
-          <motion.div whileHover={{ y: -2 }}>
-            <a href="https://github.com/0xshikhar/auriya#readme" target="_blank" rel="noopener noreferrer" className="text-gray-600 hover:text-black transition font-medium">
-              Docs
-          </motion.div>
-        </nav> */}
 
         <div className="flex items-center gap-4">
           <motion.button 

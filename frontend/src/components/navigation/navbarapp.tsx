@@ -80,11 +80,11 @@ export default function NavbarApp() {
 
           {/* Navigation Links */}
           <div className="hidden md:flex items-center gap-8">
-            <Link href="/discover" className="text-black hover:text-gumroad-pink transition font-medium">
-              Discover
-            </Link>
             <Link href="/creators" className="text-black hover:text-gumroad-pink transition font-medium">
               Creators
+            </Link>
+            <Link href="/subscribers" className="text-black hover:text-gumroad-pink transition font-medium">
+              Subscribers
             </Link>
             <Link href="/dashboard" className="text-black hover:text-gumroad-pink transition font-medium">
               Dashboard
