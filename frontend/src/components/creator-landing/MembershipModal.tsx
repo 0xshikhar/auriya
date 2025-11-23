@@ -8,6 +8,7 @@ import { useCurrentAccount } from '@mysten/dapp-kit';
 import { toast } from 'sonner';
 
 import { TierDisplay } from '@/types/creator-landing';
+import { usePurchaseSubscription } from '@/hooks/contracts/usePurchaseSubscription';
 
 interface MembershipModalProps {
   open: boolean;
@@ -15,6 +16,7 @@ interface MembershipModalProps {
   creatorAddress: string;
   creatorName: string;
   tiers: TierDisplay[];
+  subscriptionObjectId?: string;
 }
 
 export default function MembershipModal({
@@ -23,14 +25,20 @@ export default function MembershipModal({
   creatorAddress,
   creatorName,
   tiers,
+  subscriptionObjectId,
 }: MembershipModalProps) {
   const account = useCurrentAccount();
   const [selectedTier, setSelectedTier] = useState<string | null>(null);
   const [subscribing, setSubscribing] = useState(false);
+  const { purchase, isPending } = usePurchaseSubscription();
 
   const handleSubscribe = async (tier: TierDisplay) => {
     if (!account) {
       toast.error('Please connect your wallet to subscribe');
+      return;
+    }
+    if (!subscriptionObjectId) {
+      toast.error('Creator subscription is not available yet. Please refresh.');
       return;
     }
 
@@ -38,14 +46,21 @@ export default function MembershipModal({
     setSelectedTier(tier.id);
 
     try {
-      // TODO: Implement subscription transaction
-      // This will call the subscription contract
       toast.loading('Processing subscription...', { id: 'subscribe' });
-      
-      // Simulate transaction
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      toast.success(`Successfully subscribed to ${tier.name}!`, { id: 'subscribe' });
+
+      // Determine numeric tier id and amount
+      const tierId = (tier.tierId ?? Number(String(tier.id).replace('tier-', ''))) || 1;
+      const amountSui = parseFloat(tier.price);
+
+      console.log('[MembershipModal] Purchasing', { subscriptionObjectId, tierId, amountSui });
+
+      const res = await purchase({ subsId: subscriptionObjectId, tierId, amountSui });
+      const digest = (res as any)?.digest;
+
+      toast.success(`Successfully subscribed to ${tier.name}!`, {
+        id: 'subscribe',
+        description: digest ? `Tx: ${digest}` : undefined,
+      });
       onClose();
     } catch (error: any) {
       toast.error(error?.message || 'Failed to subscribe', { id: 'subscribe' });
@@ -108,7 +123,7 @@ export default function MembershipModal({
 
               <Button
                 onClick={() => handleSubscribe(tier)}
-                disabled={subscribing}
+                disabled={subscribing || isPending}
                 className={`w-full ${
                   tier.highlighted
                     ? 'bg-primary hover:bg-primary/90'
