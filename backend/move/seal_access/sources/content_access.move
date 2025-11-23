@@ -84,6 +84,55 @@ module seal_access::content_access {
         transfer::share_object(policy);
     }
     
+    // === Seal Access Control Functions ===
+    
+    /// Returns true if `prefix` is a prefix of `word`
+    /// Used to validate encryption IDs match the policy object ID pattern
+    fun is_prefix(prefix: vector<u8>, word: vector<u8>): bool {
+        if (prefix.length() > word.length()) {
+            return false
+        };
+        
+        let mut i = 0;
+        while (i < prefix.length()) {
+            if (prefix[i] != word[i]) {
+                return false
+            };
+            i = i + 1;
+        };
+        
+        true
+    }
+    
+    /// Seal-compatible access approval function
+    /// Called by Seal key servers to verify access before releasing decryption keys
+    /// Must accept subscription NFT as proof of access
+    /// CRITICAL: Validates that encryption ID starts with policy.id bytes (Seal requirement)
+    public fun seal_approve(
+        id: vector<u8>,
+        policy: &AccessPolicy,
+        subscription_nft: &SubscriptionNFT,
+        c: &Clock,
+        ctx: &TxContext
+    ) {
+        // Verify subscription grants access to this policy
+        assert!(subscription::get_creator(subscription_nft) == policy.creator, EWrongCreator);
+        // Expiry check: subscription must be active
+        assert!(clock::timestamp_ms(c) < subscription::get_expires_at(subscription_nft), ESubscriptionExpired);
+        assert!(subscription::get_tier_id(subscription_nft) >= policy.required_tier, EInsufficientTier);
+        
+        // CRITICAL: Verify encryption ID has the right prefix (policy.id bytes)
+        // This is required by Seal key servers - encryption IDs must be: [policy_id_bytes] + [nonce]
+        assert!(is_prefix(object::uid_to_bytes(&policy.id), id), EInsufficientTier);
+        
+        // Emit access granted event
+        event::emit(AccessGranted {
+            policy_id: object::id(policy),
+            subscriber: tx_context::sender(ctx),
+            tier_level: subscription::get_tier_id(subscription_nft),
+        });
+    }
+    
     // === Public View Functions ===
     
     /// Check if a subscription NFT grants access to content
