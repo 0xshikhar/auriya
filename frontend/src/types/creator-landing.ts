@@ -76,6 +76,7 @@ export interface TierDisplay {
   currency: string;
   benefits: string[];
   highlighted?: boolean;
+  tierId?: number; // numeric tier identifier from chain
   tierObjectId?: string; // Sui object ID
 }
 
