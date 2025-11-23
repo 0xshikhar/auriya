@@ -144,7 +144,7 @@ export default function LivePreview({ landingPage }: LivePreviewProps) {
       </div>
 
       {/* Tiers Section - Display if creator has tiers */}
-      {creatorTiers.length > 0 && (
+      {/* {creatorTiers.length > 0 && (
         <div className="px-6 py-8 border-b" style={{ borderColor: theme.accentColor + '20' }}>
           <div className="max-w-5xl mx-auto">
             <div className="mb-8">
@@ -198,7 +198,7 @@ export default function LivePreview({ landingPage }: LivePreviewProps) {
             </div>
           </div>
         </div>
-      )}
+      )} */}
 
       {/* Content Sections */}
       <div className="px-6 py-8 space-y-12">
