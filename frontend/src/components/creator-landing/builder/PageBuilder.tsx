@@ -176,7 +176,7 @@ export default function PageBuilder({
               <Button 
                 variant="outline" 
                 size="sm"
-                onClick={() => window.open(`/c/${creatorAddress}`, '_blank')}
+                onClick={() => window.open(`/${creatorAddress}`, '_blank')}
               >
                 <Eye className="h-4 w-4 mr-2" />
                 View Live Page
