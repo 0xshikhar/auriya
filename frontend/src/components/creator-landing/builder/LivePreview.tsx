@@ -1,11 +1,14 @@
 'use client';
 
+import { useState } from 'react';
 import { CreatorLandingPage } from '@/types/creator-landing';
 import { Button } from '@/components/ui/button';
 import { LatestPostSection, RecentPostsSection, AboutSection, TiersSection } from '../sections';
 import Image from 'next/image';
 import { getWalrusUrl } from '@/lib/walrus';
 import { useRouter } from 'next/navigation';
+import MembershipModal from '../MembershipModal';
+import { useCreatorTiers } from '@/hooks/contracts/useCreatorTiers';
 
 interface LivePreviewProps {
   landingPage: CreatorLandingPage;
@@ -14,19 +17,32 @@ interface LivePreviewProps {
 export default function LivePreview({ landingPage }: LivePreviewProps) {
   const { header, theme, sections } = landingPage;
   const router = useRouter();
+  const [showMembershipModal, setShowMembershipModal] = useState(false);
 
   const enabledSections = sections
     .filter((section) => section.enabled)
     .sort((a, b) => a.order - b.order);
 
+  // Get tiers from the creator's subscription contract
+  const { tiers: creatorTiers } = useCreatorTiers(landingPage.creatorAddress);
+  
+  // Convert to TierDisplay format for the modal
+  const tiers = creatorTiers.map(tier => ({
+    id: tier.id,
+    name: tier.name,
+    price: tier.price,
+    currency: tier.currency,
+    benefits: tier.benefits,
+    highlighted: false,
+  }));
+
   const handleMembershipClick = () => {
-    // Navigate to creator's membership/tiers page
-    router.push(`/c/${landingPage.creatorAddress}#tiers`);
+    setShowMembershipModal(true);
   };
 
   const handleJoinClick = () => {
-    // Navigate to subscription flow
-    router.push(`/c/${landingPage.creatorAddress}/subscribe`);
+    // Open membership modal for subscription
+    setShowMembershipModal(true);
   };
 
   return (
@@ -61,8 +77,11 @@ export default function LivePreview({ landingPage }: LivePreviewProps) {
         </div>
 
         {/* Profile Section */}
-        <div className="px-6 pb-6">
-          <div className="flex flex-col md:flex-row items-start md:items-end gap-4 -mt-16">
+        <div className="px-6 pb-6 relative">
+          {/* Dark overlay for better text visibility */}
+          {/* <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/20 to-transparent pointer-events-none" /> */}
+          
+          <div className="flex flex-col md:flex-row items-start md:items-end gap-4 -mt-16 relative z-10">
             {/* Profile Photo */}
             <div
               className="w-32 h-32 rounded-full border-4 flex-shrink-0 overflow-hidden relative"
@@ -87,18 +106,18 @@ export default function LivePreview({ landingPage }: LivePreviewProps) {
             </div>
 
             {/* Name and Actions */}
-            <div className="flex-1 flex flex-col md:flex-row md:items-end justify-between gap-4 w-full">
+            <div className="flex-1 flex flex-col md:flex-row md:items-center justify-between gap-4 w-full pt-16">
               <div>
-                <h1 className="text-3xl font-bold mb-1">
+                <h1 className="text-3xl font-bold">
                   {header.displayName || 'Creator Name'}
                 </h1>
                 <p className="text-sm opacity-80">
-                  {header.tagline || 'Full stack dev'}
+                  {header.tagline || ' Creator'}
                 </p>
-                <p className="text-sm opacity-60 mt-1">0 posts</p>
+                <p className="text-sm opacity-60">0 posts</p>
               </div>
 
-              <div className="flex gap-2">
+              <div className="flex gap-2 flex-shrink-0">
                     <Button 
                   variant="outline"
                   onClick={handleMembershipClick}
@@ -122,6 +141,63 @@ export default function LivePreview({ landingPage }: LivePreviewProps) {
           </div>
         </div>
       </div>
+
+      {/* Tiers Section - Display if creator has tiers */}
+      {creatorTiers.length > 0 && (
+        <div className="px-6 py-8 border-b" style={{ borderColor: theme.accentColor + '20' }}>
+          <div className="max-w-5xl mx-auto">
+            <div className="mb-8">
+              <h2 className="text-3xl font-bold mb-2">Membership Tiers</h2>
+              <p className="opacity-80">Choose a tier to support and get exclusive access</p>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {creatorTiers.map((tier, i) => (
+                <div
+                  key={tier.id}
+                  className="border-2 rounded-2xl p-6 hover:shadow-lg transition"
+                  style={{
+                    backgroundColor: theme.backgroundColor,
+                    borderColor: i === 0 ? theme.primaryColor : theme.accentColor,
+                  }}
+                >
+                  <div className="flex items-center gap-3 mb-4">
+                    <div
+                      className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg"
+                      style={{
+                        backgroundColor: theme.primaryColor,
+                        color: '#000',
+                      }}
+                    >
+                      {i + 1}
+                    </div>
+                    <span className="text-xl font-bold">{tier.name}</span>
+                  </div>
+                  
+                  <div className="mb-4">
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-3xl font-bold">{tier.price}</span>
+                      <span className="text-sm opacity-60">{tier.currency}</span>
+                    </div>
+                    <p className="text-sm opacity-60 mt-1">{tier.duration} days</p>
+                  </div>
+                  
+                  <Button
+                    onClick={handleMembershipClick}
+                    className="w-full"
+                    style={{
+                      backgroundColor: i === 0 ? theme.primaryColor : theme.accentColor,
+                      color: '#000',
+                    }}
+                  >
+                    Subscribe
+                  </Button>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Content Sections */}
       <div className="px-6 py-8 space-y-12">
@@ -159,6 +235,15 @@ export default function LivePreview({ landingPage }: LivePreviewProps) {
           </div>
         )}
       </div>
+
+      {/* Membership Modal */}
+      <MembershipModal
+        open={showMembershipModal}
+        onClose={() => setShowMembershipModal(false)}
+        creatorAddress={landingPage.creatorAddress || ''}
+        creatorName={header.displayName || 'Creator'}
+        tiers={tiers}
+      />
     </div>
   );
 }
