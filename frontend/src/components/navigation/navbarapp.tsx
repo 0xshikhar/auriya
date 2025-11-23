@@ -37,9 +37,6 @@ export default function NavbarApp() {
             <Link href="/creators" className="text-black hover:text-gumroad-pink transition font-medium">
               Creators
             </Link>
-            <Link href="/pricing" className="text-black hover:text-gumroad-pink transition font-medium">
-              Pricing
-            </Link>
             <Link href="/dashboard" className="text-black hover:text-gumroad-pink transition font-medium">
               Dashboard
             </Link>
