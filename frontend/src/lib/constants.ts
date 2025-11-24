@@ -24,14 +24,12 @@ export const WALRUS_AGGREGATOR = 'https://aggregator.walrus-testnet.walrus.space
 export const WALRUS_DEFAULT_EPOCHS = 5; // storage duration
 
 // Contract package & shared object IDs
-// NOTE: Update these after deploying to Sui testnet. Kept here (not in .env) per project guideline.
-// export const CREATOR_PROFILE_REGISTRY_ID = '0x504ec3f9e01a5296215a707d3caee0d5bfed18ef5a701f64da2170fa4fbb87bb';
 
 export const SUBSCRIPTION_PACKAGE_ID = '0x9e0516bded6a0b380331cbfdc498503d59f23a93985782d9f493d5fdbb8c0464';
 export const SUBSCRIPTION_TREASURY_ID = '0xf364c48c6b18e9a97b92e56ea94822492b4af829602f0384bb4110e58bc377c3';
 
-// Updated with encryption_metadata field support (deployed 2025-11-24)
-export const CONTENT_PACKAGE_ID = '0x35bfc5722ef228581b825a32cb4971f38b0470d3db2cd081e69ac40565975e15';
+export const CONTENT_PACKAGE_ID = '0xd65ae277418eb3e4aad104b68f86595e26e50a3b2c3c16d7e62b844776f4ce0d';
+// Optional: if you pre-created a registry for development, put its ID here, else pass at call-site
 export const DEFAULT_CONTENT_REGISTRY_ID = '';
 
 // Landing Page Registry 
@@ -41,28 +39,22 @@ export const CREATOR_PROFILE_PACKAGE_ID = '0x1ba3dac9157e597bfaf27e94f6f2fa513bd
 export const CREATOR_PROFILE_REGISTRY_ID = '0xe6b3363c91fb1883c49bace782b25dbefdb3c5158fb1dfe878507a6833cf7d5c';
 
 // Seal Access Control Package (deploy seal_access Move package and update this)
-export const SEAL_ACCESS_CONTROL_PACKAGE_ID = '0x1435b35c3d5bfb75224a5394ea47cf4054c84277e63aa7a2f1bc2188cf6b814a';
+export const SEAL_ACCESS_CONTROL_PACKAGE_ID = '0x177e35a6fb3573272e4268e8c789bcd31ef058dc7f0a8e41ebbf7a661cf5619a';
 
-// Verified Seal Key Servers (Mysten Labs Testnet - Open Mode)
+
+// Seal Configuration (Mysten Labs testnet key servers - Open mode)
 export const SEAL_KEY_SERVERS = [
   {
+    name: 'mysten-testnet-1',
     objectId: '0x73d05d62c18d9374e3ea529e8e0ed6161da1a141a94d3f76ae3fe4e99356db75',
     weight: 1,
-    url: 'https://seal-key-server-testnet-1.mystenlabs.com',
-    name: 'mysten-testnet-1'
   },
   {
+    name: 'mysten-testnet-2',
     objectId: '0xf5d14a81a982144ae441cd7d64b09027f116a468bd36e7eca494f750591623c8',
     weight: 1,
-    url: 'https://seal-key-server-testnet-2.mystenlabs.com',
-    name: 'mysten-testnet-2'
   },
 ];
 
-// Seal configuration
-export const SEAL_THRESHOLD = 2; // 2-out-of-2 threshold for decryption
-export const SEAL_SESSION_KEY_TTL = 10; // 10 minutes
- 
-// mysten-testnet-2 (Open mode)
-export const SEAL_KEY_SERVER_ID = '0xf5d14a81a982144ae441cd7d64b09027f116a468bd36e7eca494f750591623c8';
-export const SEAL_KEY_SERVER_URL = 'https://seal-key-server-testnet-2.mystenlabs.com';
+export const SEAL_THRESHOLD = 2; // Require 2 key servers for decryption
+export const SEAL_SESSION_KEY_TTL = 10; // Session key TTL in minutes
