@@ -7,10 +7,9 @@ import { startZkLogin } from '@/lib/enoki';
 import { useCreatorProfile } from '@/hooks/contracts/useCreatorProfile';
 import { useCreatorTiers } from '@/hooks/contracts/useCreatorTiers';
 import { useCreatorContent } from '@/hooks/contracts/useCreatorContent';
-import { useUnifiedAccount } from '@/hooks/useUnifiedAccount';
 
 export default function DashboardPage() {
-  const { selected: account } = useUnifiedAccount();
+  const account = useCurrentAccount();
   const { profile, hasProfile, isLoading: profileLoading } = useCreatorProfile(account?.address);
   const { tiers, subscriptionObjectId } = useCreatorTiers(account?.address);
   const { postCount, posts } = useCreatorContent(profile?.contentRegistryId);
@@ -67,7 +66,7 @@ export default function DashboardPage() {
               <DollarSign className="w-5 h-5 text-gumroad-pink" />
             </div>
             <div className="text-3xl font-bold text-black">{totalRevenueSui.toFixed(2)} SUI</div>
-            <div className="text-sm text-gray-500 mt-1">95% revenue share</div>
+            <div className="text-sm text-gray-500 mt-1">97% revenue share</div>
           </div>
 
           <div className="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-lg transition">
