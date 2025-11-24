@@ -51,7 +51,7 @@ export default function Footer() {
           <div className="flex gap-6 mt-4 md:mt-0">
             {/* <a href="https://github.com/0xshikhar/auriya/blob/main/LICENSE" target="_blank" rel="noopener noreferrer" className="hover:text-black transition">MIT License</a> */}
             {/* <a href="https://github.com/0xshikhar/auriya" target="_blank" rel="noopener noreferrer" className="hover:text-black transition">View Source</a> */}
-            <a href="https://walrus.site" target="_blank" rel="noopener noreferrer" className="hover:text-black transition">Powered by Walrus Storage</a>
+            <a href="https://www.walrus.xyz" target="_blank" rel="noopener noreferrer" className="hover:text-black transition">Powered by Walrus</a>
           </div>
         </div>
       </div>
