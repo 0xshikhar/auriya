@@ -1,12 +1,12 @@
-import { SealClient, SessionKey, type EncryptOptions, type DecryptOptions, DemType } from '@mysten/seal';
-import { fromB64 } from '@mysten/bcs';
-// no signer imports needed
+import { SealClient, SessionKey, type EncryptOptions, type DecryptOptions, DemType, EncryptedObject } from '@mysten/seal';
+import { fromHex, toHex } from '@mysten/sui/utils';
 import { createSuiClient } from './sui';
 import { 
   SEAL_ACCESS_CONTROL_PACKAGE_ID, 
   SEAL_KEY_SERVERS, 
   SEAL_THRESHOLD,
-  SEAL_SESSION_KEY_TTL 
+  SEAL_SESSION_KEY_TTL,
+  SUI_CLOCK_OBJECT_ID,
 } from './constants';
 import { Transaction } from '@mysten/sui/transactions';
 
@@ -32,8 +32,18 @@ export function createSealClient() {
   return sealClient;
 }
 
-// Global Seal client instance
-export const sealClient = createSealClient();
+// Lazy singleton to avoid SSR/sessionStorage warnings during build
+let _sealClient: SealClient | null = null;
+export function getSealClient(): SealClient {
+  if (typeof window === 'undefined') {
+    // During SSR, return a thrower proxy if accidentally used
+    throw new Error('SealClient accessed on server. Call only from client-side code.');
+  }
+  if (!_sealClient) {
+    _sealClient = createSealClient();
+  }
+  return _sealClient;
+}
 
 // (no-op helper removed; we use fromSerializedSignature)
 
