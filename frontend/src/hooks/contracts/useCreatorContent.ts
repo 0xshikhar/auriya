@@ -71,11 +71,31 @@ export function useCreatorContent(registryId?: string, creatorAddress?: string) 
       try {
         // Get post IDs from registry
         console.log('📋 [useCreatorContent] Fetching post IDs...');
-        const postIds = await getRegistryPostIds(targetRegistryId);
+        let postIds = await getRegistryPostIds(targetRegistryId);
         console.log('✅ [useCreatorContent] Got post IDs:', postIds);
 
+        // Fallback: if registry returns none, derive posts from PostCreated events
+        if (postIds.length === 0 && creatorAddress) {
+          try {
+            console.log('🧭 [useCreatorContent] Fallback: deriving posts from PostCreated events for', creatorAddress);
+            const client = createSuiClient();
+            const eventType = `${CONTENT_PACKAGE_ID}::content::PostCreated`;
+            const res = await client.queryEvents({ query: { MoveEventType: eventType }, limit: 200, order: 'descending' });
+            const idsFromEvents = (res.data as any[])
+              .filter((e: any) => (e.parsedJson?.creator || '').toLowerCase() === creatorAddress.toLowerCase())
+              .map((e: any) => e.parsedJson?.post_id as string)
+              .filter((id: any) => typeof id === 'string');
+            // Unique, newest first
+            const seen = new Set<string>();
+            postIds = idsFromEvents.filter((id: string) => (seen.has(id) ? false : (seen.add(id), true)));
+            console.log('✅ [useCreatorContent] Fallback post IDs from events:', postIds);
+          } catch (evErr) {
+            console.warn('⚠️ [useCreatorContent] Failed to fallback to events:', evErr);
+          }
+        }
+
         if (postIds.length === 0) {
-          console.log('ℹ️ [useCreatorContent] No posts found in registry');
+          console.log('ℹ️ [useCreatorContent] No posts found for creator');
           if (!cancelled) {
             setPosts([]);
             setIsLoading(false);
