@@ -6,7 +6,7 @@ export default function Footer() {
           <div>
             <h3 className="font-bold mb-4">Auriya</h3>
             <p className="text-sm text-gray-600">
-              Decentralized creator monetization on Sui. Own your audience, keep 97% revenue.
+              Decentralized creator monetization on Walrus. Own your audience, keep 97% revenue.
             </p>
           </div>
 
@@ -47,11 +47,11 @@ export default function Footer() {
         </div>
 
         <div className="border-t border-gray-200 pt-8 flex flex-col md:flex-row justify-between items-center text-sm text-gray-600">
-          <p>&copy; 2025 Auriya. Built on Sui. Open source.</p>
+          <p>&copy; 2025 Auriya.</p>
           <div className="flex gap-6 mt-4 md:mt-0">
-            <a href="https://github.com/0xshikhar/auriya/blob/main/LICENSE" target="_blank" rel="noopener noreferrer" className="hover:text-black transition">MIT License</a>
-            <a href="https://github.com/0xshikhar/auriya" target="_blank" rel="noopener noreferrer" className="hover:text-black transition">View Source</a>
-            <a href="https://sui.io" target="_blank" rel="noopener noreferrer" className="hover:text-black transition">Powered by Sui</a>
+            {/* <a href="https://github.com/0xshikhar/auriya/blob/main/LICENSE" target="_blank" rel="noopener noreferrer" className="hover:text-black transition">MIT License</a> */}
+            {/* <a href="https://github.com/0xshikhar/auriya" target="_blank" rel="noopener noreferrer" className="hover:text-black transition">View Source</a> */}
+            <a href="https://walrus.site" target="_blank" rel="noopener noreferrer" className="hover:text-black transition">Powered by Walrus Storage</a>
           </div>
         </div>
       </div>
