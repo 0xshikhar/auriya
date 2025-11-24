@@ -8,6 +8,7 @@ import Image from 'next/image';
 import { getWalrusUrl } from '@/lib/walrus';
 import { useRouter } from 'next/navigation';
 import MembershipModal from '../MembershipModal';
+import DonationModal from '../DonationModal';
 import { useCreatorTiers } from '@/hooks/contracts/useCreatorTiers';
 
 interface LivePreviewProps {
@@ -18,6 +19,11 @@ export default function LivePreview({ landingPage }: LivePreviewProps) {
   const { header, theme, sections } = landingPage;
   const router = useRouter();
   const [showMembershipModal, setShowMembershipModal] = useState(false);
+  const [showDonationModal, setShowDonationModal] = useState(false);
+
+  // Backward compatibility: migrate old showJoinButton to showSupportButton
+  const showSupportButton = header.showSupportButton ?? header.showJoinButton ?? true;
+  const supportButtonText = header.supportButtonText || header.joinButtonText || 'Support Me';
 
   const enabledSections = sections
     .filter((section) => section.enabled)
@@ -41,9 +47,9 @@ export default function LivePreview({ landingPage }: LivePreviewProps) {
     setShowMembershipModal(true);
   };
 
-  const handleJoinClick = () => {
-    // Open membership modal for subscription
-    setShowMembershipModal(true);
+  const handleSupportClick = () => {
+    // Open donation modal for direct support
+    setShowDonationModal(true);
   };
 
   return (
@@ -125,16 +131,16 @@ export default function LivePreview({ landingPage }: LivePreviewProps) {
                 >
                   Membership
                 </Button>
-                {header.showJoinButton && (
+                {showSupportButton && (
                   <Button
-                    onClick={handleJoinClick}
+                    onClick={handleSupportClick}
                     style={{
                       backgroundColor: theme.primaryColor,
                       color: '#000',
                     }}
                     className="font-semibold"
                   >
-                    {header.joinButtonText || 'Join for free'}
+                    {supportButtonText}
                   </Button>
                 )}
               </div>
@@ -245,6 +251,14 @@ export default function LivePreview({ landingPage }: LivePreviewProps) {
         creatorName={header.displayName || 'Creator'}
         tiers={tiers}
         subscriptionObjectId={subscriptionObjectId}
+      />
+
+      {/* Donation Modal */}
+      <DonationModal
+        open={showDonationModal}
+        onClose={() => setShowDonationModal(false)}
+        creatorAddress={landingPage.creatorAddress || ''}
+        creatorName={header.displayName || 'Creator'}
       />
     </div>
   );

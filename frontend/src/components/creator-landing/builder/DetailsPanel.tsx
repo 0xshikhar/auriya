@@ -170,14 +170,17 @@ export default function DetailsPanel({ landingPage, onUpdate }: DetailsPanelProp
         )}
       </div>
 
-      {/* Header Options */}
+      {/* Support Button */}
       <div className="border rounded-lg">
         <button
           onClick={() => toggleSection('headerOptions')}
           className="w-full px-4 py-3 flex items-center justify-between hover:bg-muted/50 transition-colors"
         >
           <div className="text-left">
-            <div className="font-medium text-sm">Header options</div>
+            <div className="font-medium text-sm">Support button</div>
+            <div className="text-xs text-muted-foreground">
+              Allow supporters to donate directly in SUI
+            </div>
           </div>
           <ChevronRight
             className={`h-4 w-4 transition-transform ${
@@ -189,21 +192,37 @@ export default function DetailsPanel({ landingPage, onUpdate }: DetailsPanelProp
           <div className="px-4 pb-4 space-y-3 border-t pt-3">
             <div className="flex items-center gap-2">
               <input
-                type="radio"
-                id="use-profile-photo"
-                name="header-option"
-                checked={landingPage.header.showJoinButton}
-                onChange={() =>
+                type="checkbox"
+                id="show-support-button"
+                checked={landingPage.header.showSupportButton}
+                onChange={(e) =>
                   onUpdate({
-                    header: { ...landingPage.header, showJoinButton: true },
+                    header: { ...landingPage.header, showSupportButton: e.target.checked },
                   })
                 }
                 className="w-4 h-4"
               />
-              <label htmlFor="use-profile-photo" className="text-sm">
-                Use profile photo
+              <label htmlFor="show-support-button" className="text-sm">
+                Show support button
               </label>
             </div>
+            {landingPage.header.showSupportButton && (
+              <div>
+                <Label className="text-xs mb-2 block">Button text</Label>
+                <Input
+                  value={landingPage.header.supportButtonText}
+                  onChange={(e) =>
+                    onUpdate({
+                      header: { ...landingPage.header, supportButtonText: e.target.value },
+                    })
+                  }
+                  placeholder="Support Me"
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Customize the text shown on the donation button
+                </p>
+              </div>
+            )}
           </div>
         )}
       </div>

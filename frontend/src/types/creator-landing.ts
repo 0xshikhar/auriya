@@ -118,8 +118,10 @@ export interface HeaderConfig {
   coverPhotoWalrusId?: string;
   displayName: string;
   tagline: string;
-  showJoinButton: boolean;
-  joinButtonText: string;
+  showJoinButton?: boolean; // deprecated, kept for backward compatibility
+  joinButtonText?: string; // deprecated, kept for backward compatibility
+  showSupportButton: boolean;
+  supportButtonText: string;
 }
 
 export interface SocialLinks {
@@ -256,8 +258,8 @@ export const DEFAULT_HEADER: HeaderConfig = {
   pageName: '',
   displayName: '',
   tagline: '',
-  showJoinButton: true,
-  joinButtonText: 'Join for free',
+  showSupportButton: true,
+  supportButtonText: 'Support Me',
 };
 
 // Available section types for the "Add" menu
