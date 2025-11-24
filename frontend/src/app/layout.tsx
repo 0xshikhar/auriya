@@ -7,7 +7,7 @@ import { Toaster } from "@/components/ui/sonner"
 
 
 export const metadata: Metadata = {
-  title: "Auriya – Sell your work, get paid",
+  title: "Auriya – Decentralized Creator Economy Platform",
   description: "Go from 0 to $1. Anyone can earn their first dollar online. Just start with what you know, see what sticks, and get paid.",
   icons: {
     icon: [
