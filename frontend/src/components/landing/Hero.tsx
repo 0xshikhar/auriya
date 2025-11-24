@@ -67,8 +67,8 @@ export default function Hero() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.1 }}
         >
-          Own your audience.
-          <br />Keep 97% revenue.
+          Own Your Content.
+          <br />Keep 97% Revenue.
         </motion.h1>
         
         <motion.p 
@@ -77,7 +77,7 @@ export default function Hero() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
         >
-          Decentralized creator monetization on Sui. NFT subscriptions, Walrus storage, instant payments. No middlemen, no deplatforming risk.
+          The decentralized creator economy platform. Content stored forever on <span className="font-semibold text-gray-800">Walrus</span>, secured with <span className="font-semibold text-gray-800">Mysten Seal</span> encryption, powered by <span className="font-semibold text-gray-800">Sui blockchain</span>. NFT subscriptions, instant payments, zero censorship.
         </motion.p>
 
         <motion.div 
@@ -112,12 +112,18 @@ export default function Hero() {
         </motion.div>
 
         <motion.div 
-          className="text-sm text-gray-600"
+          className="text-sm text-gray-600 space-y-2"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.6, delay: 0.4 }}
         >
-          <a href="https://github.com/0xshikhar/auriya" target="_blank" rel="noopener noreferrer" className="hover:text-black transition font-medium">Built on Sui • Powered by Walrus & zkLogin</a>
+          <div className="flex flex-wrap justify-center gap-3 text-xs font-semibold">
+            <span className="px-3 py-1 bg-gradient-to-r from-blue-100 to-blue-50 rounded-full border border-blue-200">🔗 Sui Blockchain</span>
+            <span className="px-3 py-1 bg-gradient-to-r from-purple-100 to-purple-50 rounded-full border border-purple-200">🐋 Walrus Storage</span>
+            <span className="px-3 py-1 bg-gradient-to-r from-green-100 to-green-50 rounded-full border border-green-200">🔐 Mysten Seal</span>
+            <span className="px-3 py-1 bg-gradient-to-r from-pink-100 to-pink-50 rounded-full border border-pink-200">🎭 zkLogin</span>
+          </div>
+          {/* <a href="https://github.com/0xshikhar/auriya" target="_blank" rel="noopener noreferrer" className="hover:text-black transition font-medium block">Walrus Haulout Hackathon 2025 • View on GitHub →</a> */}
         </motion.div>
       </motion.div>
     </section>
