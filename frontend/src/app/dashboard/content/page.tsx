@@ -167,7 +167,7 @@ function ContentPageInner() {
                   <>
                     <span className="font-mono text-xs">{effectiveRegistry}</span>
                     {!profile?.contentRegistryId && (
-                      <span className="ml-2 text-yellow-700">(not linked to profile)</span>
+                      <span className="ml-2 text-yellow-700"> </span>
                     )}
                   </>
                 ) : (
