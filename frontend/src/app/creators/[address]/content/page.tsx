@@ -28,8 +28,10 @@ function CreatorContentInner() {
   console.log('📄 [CreatorContentPage] Posts count:', posts.length);
   console.log('🎫 [CreatorContentPage] Subscriptions count:', subscriptions.length);
   
-  // Find subscription for this creator
-  const subscription = subscriptions.find(sub => sub.creator === creatorAddress);
+  // Find subscription for this creator (case-insensitive)
+  const subscription = subscriptions.find(
+    (sub) => sub.creator.toLowerCase() === creatorAddress.toLowerCase()
+  );
   console.log('🎫 [CreatorContentPage] Active subscription:', subscription);
   
   if (!account) {
@@ -62,33 +64,17 @@ function CreatorContentInner() {
     );
   }
   
-  if (!subscription) {
-    console.log('📭 [CreatorContentPage] No subscription found');
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center max-w-md p-8">
-          <Lock className="w-16 h-16 text-gumroad-pink mx-auto mb-4" />
-          <h2 className="text-3xl font-bold mb-2">Subscribe to Access</h2>
-          <p className="text-gray-600 mb-6">
-            Subscribe to this creator to unlock their exclusive encrypted content
-          </p>
-          <Link href={`/creators/${creatorAddress}`}>
-            <Button className="bg-black hover:bg-gray-800 text-white">
-              View Subscription Tiers
-            </Button>
-          </Link>
-        </div>
-      </div>
-    );
-  }
+  // Filter posts by tier
+  // If user has subscription, show posts at or below their tier
+  // If no subscription, only show public posts (tier 0)
+  const userTier = subscription?.tier_level ?? 0;
   
-  // Filter posts by tier - show posts at or below subscription tier
   const accessiblePosts = posts.filter(post => 
-    post.fields.required_tier <= subscription.tier_level
+    post.fields.required_tier <= userTier
   );
   
   const lockedPosts = posts.filter(post => 
-    post.fields.required_tier > subscription.tier_level
+    post.fields.required_tier > userTier
   );
   
   console.log('✅ [CreatorContentPage] Accessible posts:', accessiblePosts.length);
@@ -117,26 +103,45 @@ function CreatorContentInner() {
           </div>
           
           {/* Subscription Status */}
-          <div className="bg-white border-2 border-gray-200 rounded-xl p-4 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Shield className="w-5 h-5 text-gumroad-pink" />
-              <div>
-                <p className="font-semibold text-black">Your Subscription</p>
-                <p className="text-sm text-gray-600">
-                  <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold ${tierColors[subscription.tier_level]}`}>
-                    {tierNames[subscription.tier_level]} Tier
-                  </span>
-                  {' • '}
-                  {accessiblePosts.length} posts accessible
-                </p>
+          {subscription ? (
+            <div className="bg-white border-2 border-gray-200 rounded-xl p-4 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Shield className="w-5 h-5 text-gumroad-pink" />
+                <div>
+                  <p className="font-semibold text-black">Your Subscription</p>
+                  <p className="text-sm text-gray-600">
+                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold ${tierColors[subscription.tier_level]}`}>
+                      {tierNames[subscription.tier_level]} Tier
+                    </span>
+                    {' • '}
+                    {accessiblePosts.length} posts accessible
+                  </p>
+                </div>
               </div>
+              <Link href="/subscribers">
+                <Button variant="outline" size="sm">
+                  Manage Subscriptions
+                </Button>
+              </Link>
             </div>
-            <Link href="/subscribers/content">
-              <Button variant="outline" size="sm">
-                Manage Subscriptions
-              </Button>
-            </Link>
-          </div>
+          ) : (
+            <div className="bg-white border-2 border-gumroad-pink rounded-xl p-4 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Lock className="w-5 h-5 text-gumroad-pink" />
+                <div>
+                  <p className="font-semibold text-black">No Subscription</p>
+                  <p className="text-sm text-gray-600">
+                    Subscribe to unlock exclusive content • Viewing {accessiblePosts.length} public posts
+                  </p>
+                </div>
+              </div>
+              <Link href={`/creators/${creatorAddress}`}>
+                <Button className="bg-black hover:bg-gray-800 text-white" size="sm">
+                  Subscribe Now
+                </Button>
+              </Link>
+            </div>
+          )}
         </div>
         
         {/* Accessible Content */}
@@ -150,7 +155,7 @@ function CreatorContentInner() {
                 <DecryptedContentCard
                   key={post.id}
                   post={post}
-                  subscriptionNftId={subscription.id}
+                  subscriptionNftId={subscription?.id}
                 />
               ))}
             </div>
