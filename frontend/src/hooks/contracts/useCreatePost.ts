@@ -4,6 +4,7 @@ import { useCallback } from 'react';
 import { Transaction } from '@mysten/sui/transactions';
 import { CONTENT_PACKAGE_ID, SUI_CLOCK_OBJECT_ID } from '@/lib/constants';
 import { useUnifiedTransaction } from '@/hooks/useUnifiedTransaction';
+import { createSuiClient } from '@/lib/sui';
 
 export type CreatePostInput = {
   registryId: string;
@@ -58,8 +59,19 @@ export function useCreatePost() {
     tx.setGasBudget(20_000_000);
 
     const res = await signAndExecute({ transaction: tx });
-
-    return res;
+    // Ensure effects/object changes are available for callers to parse object IDs
+    // @ts-ignore
+    const digest = res?.digest as string | undefined;
+    if (!digest) return res;
+    const client = createSuiClient();
+    const full = await (client as any).waitForTransactionBlock?.({
+      digest,
+      options: { showEffects: true, showEvents: true, showObjectChanges: true } as any,
+    }) ?? await (client as any).waitForTransaction({
+      digest,
+      options: { showEffects: true, showEvents: true, showObjectChanges: true } as any,
+    });
+    return full as any;
   }, [signAndExecute]);
 
   return { createPost, isPending } as const;

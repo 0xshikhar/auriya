@@ -100,12 +100,31 @@ export function DecryptedContentCard({ post, subscriptionNftId }: DecryptedConte
       
       // 4. Create access verification transaction
       console.log('📝 [DecryptedContentCard] Creating access verification transaction...');
+      console.log('📋 [DecryptedContentCard] Post fields for policy check:', {
+        access_policy_id: post.fields?.access_policy_id,
+        seal_policy_id: post.fields?.seal_policy_id,
+      });
       toast.info('📝 Verifying access...');
       let txBytes: Uint8Array | undefined;
-      if (subscriptionNftId) {
-        txBytes = await createAccessVerificationTx(subscriptionNftId, post.id);
+      
+      // Resolve AccessPolicy ID from post (supports string or Option encoding)
+      const rawPolicy = post.fields?.access_policy_id ?? post.fields?.seal_policy_id;
+      const policyId: string | undefined =
+        typeof rawPolicy === 'string'
+          ? rawPolicy
+          : (rawPolicy?.fields?.vec?.[0] ?? rawPolicy?.fields?.some);
+      console.log('🛡️ [DecryptedContentCard] Resolved policyId:', policyId);
+      
+      if (subscriptionNftId && policyId) {
+        // Build verification PTB with content ID, subscription NFT, and policy
+        txBytes = await createAccessVerificationTx(
+          metadata.id,
+          subscriptionNftId,
+          policyId,
+          metadata.packageId
+        );
       } else {
-        console.log('ℹ️ [DecryptedContentCard] No subscription NFT provided; attempting open-mode decryption.');
+        console.log('ℹ️ [DecryptedContentCard] No subscription NFT or policy; attempting open-mode decryption.');
         txBytes = undefined;
       }
       console.log('✅ [DecryptedContentCard] Access verification transaction created');

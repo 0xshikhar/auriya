@@ -61,17 +61,24 @@ export interface EncryptedContent {
  * @param file - File to encrypt
  * @param requiredTier - Minimum subscription tier required (0-3)
  * @param creatorAddress - Creator's Sui address
+ * @param accessPolicyId - REQUIRED: Pre-created AccessPolicy object ID
  * @returns Encrypted data and metadata
+ * 
+ * CRITICAL: You MUST create an AccessPolicy object BEFORE calling this function.
+ * The encryption ID will be: [accessPolicyId bytes] + [5-byte nonce]
+ * This is required by Seal key servers for access verification.
  */
 export async function encryptContent(
   file: File,
   requiredTier: number,
-  creatorAddress: string
+  creatorAddress: string,
+  accessPolicyId: string
 ): Promise<EncryptedContent> {
   console.log('🔐 [Seal] Starting encryption process...');
   console.log('📄 [Seal] File:', { name: file.name, size: file.size, type: file.type });
   console.log('🎯 [Seal] Required tier:', requiredTier);
-  console.log('👤 [Seal] Creator:', creatorAddress);
+  console.log('👤 [Seal] Creator Address:', creatorAddress);
+  console.log('🛡️ [Seal] Access Policy ID:', accessPolicyId);
   
   try {
     // Convert file to Uint8Array
@@ -80,27 +87,20 @@ export async function encryptContent(
     const data = new Uint8Array(arrayBuffer);
     console.log('✅ [Seal] File converted:', data.length, 'bytes');
 
-    // Generate unique ID for this content (must be valid hex string)
-    // Combine creator address, timestamp, and tier into a hex string
-    const timestamp = Date.now();
-    const uniqueString = `${creatorAddress}-${timestamp}-${requiredTier}-${file.name}`;
+    // CRITICAL: Generate encryption ID following Seal pattern
+    // Pattern: [accessPolicyId bytes] + [5-byte nonce]
+    // This is REQUIRED by Seal key servers - they verify the ID prefix matches the policy object
+    const nonce = crypto.getRandomValues(new Uint8Array(5));
+    const policyIdBytes = fromHex(accessPolicyId);
+    const idBytes = new Uint8Array(policyIdBytes.length + nonce.length);
+    idBytes.set(policyIdBytes, 0);
+    idBytes.set(nonce, policyIdBytes.length);
+    const contentId = toHex(idBytes);
     
-    // Create a simple hash by converting to bytes and taking first 32 bytes
-    const encoder = new TextEncoder();
-    const bytes = encoder.encode(uniqueString);
-    
-    // Create a 32-byte hex ID by repeating/truncating the bytes
-    const idBytes = new Uint8Array(32);
-    for (let i = 0; i < 32; i++) {
-      idBytes[i] = bytes[i % bytes.length];
-    }
-    
-    // Convert to hex string
-    const contentId = '0x' + Array.from(idBytes)
-      .map(b => b.toString(16).padStart(2, '0'))
-      .join('');
-    
-    console.log('🆔 [Seal] Generated content ID:', contentId);
+    console.log('🆔 [Seal] Generated encryption ID (policy + nonce):', contentId);
+    console.log('🔢 [Seal] Policy ID bytes:', policyIdBytes.length, 'bytes');
+    console.log('🔢 [Seal] Nonce (5B):', toHex(nonce));
+    console.log('🔢 [Seal] Total ID bytes:', idBytes.length, 'bytes');
 
     // Encrypt using Seal
     console.log('🔒 [Seal] Encrypting with Seal SDK...');
@@ -120,7 +120,7 @@ export async function encryptContent(
       demType: DemType.AesGcm256,
     };
 
-    const encrypted = await sealClient.encrypt(encryptOptions);
+    const encrypted = await getSealClient().encrypt(encryptOptions);
     console.log('✅ [Seal] Encryption successful!');
     console.log('📊 [Seal] Encrypted data size:', encrypted.encryptedObject.length, 'bytes');
 
@@ -210,21 +210,41 @@ export async function decryptContent(
   console.log('🎫 [Seal] Subscription NFT:', subscriptionNftId);
   
   try {
-    console.log('🔒 [Seal] Decrypting with Seal SDK...');
-    console.log('⚙️ [Seal] Decryption options:', {
-      dataSize: encryptedData.length,
-      threshold: encryptionMetadata.threshold,
-      checkShareConsistency: true
-    });
-    
+    // Parse encrypted object to get the full ID
+    const encryptedObject = EncryptedObject.parse(encryptedData);
+    const fullId = encryptedObject.id;
+    console.log('🔍 [Seal] Parsed encrypted object ID:', fullId);
+
+    // Step 1: Fetch decryption keys from key servers (if txBytes provided)
+    if (txBytes && txBytes.length > 0) {
+      console.log('🔑 [Seal] Fetching decryption keys from key servers...');
+      console.log('🔐 [Seal] Using verification mode with txBytes:', txBytes.length, 'bytes');
+      
+      try {
+        await getSealClient().fetchKeys({
+          ids: [fullId],
+          txBytes,
+          sessionKey,
+          threshold: SEAL_THRESHOLD,
+        });
+        console.log('✅ [Seal] Decryption keys fetched successfully');
+      } catch (fetchError) {
+        console.error('❌ [Seal] Failed to fetch keys:', fetchError);
+        throw fetchError;
+      }
+    } else {
+      console.log('🔓 [Seal] Using open mode (no access verification)');
+    }
+
+    // Step 2: Decrypt the content locally using fetched keys
+    console.log('🔒 [Seal] Decrypting content...');
     const decryptOptions: DecryptOptions = {
       data: encryptedData,
       sessionKey,
-      checkShareConsistency: true,
-      ...(txBytes && txBytes.length > 0 ? { txBytes } : {}),
-    } as DecryptOptions;
+      txBytes: txBytes || new Uint8Array(0),
+    };
 
-    const decrypted = await sealClient.decrypt(decryptOptions);
+    const decrypted = await getSealClient().decrypt(decryptOptions);
     console.log('✅ [Seal] Decryption successful!');
     console.log('📊 [Seal] Decrypted data size:', decrypted.length, 'bytes');
     
@@ -243,30 +263,45 @@ export async function decryptContent(
  * Create transaction for access verification
  * This transaction will be used by Seal key servers to verify subscription
  */
+export type VerificationArgOrder = 'policy_first' | 'subscription_first';
+
 export async function createAccessVerificationTx(
+  contentIdHex: string,
   subscriptionNftId: string,
-  contentPostId: string
+  accessPolicyId: string,
+  pkgIdOverride?: string,
 ): Promise<Uint8Array> {
   console.log('📝 [Seal] Creating access verification transaction...');
+  console.log('🆔 [Seal] Content ID:', contentIdHex);
   console.log('🎫 [Seal] Subscription NFT:', subscriptionNftId);
-  console.log('📄 [Seal] Content Post ID:', contentPostId);
+  console.log('🛡️ [Seal] Access Policy ID:', accessPolicyId);
   
   try {
     const tx = new Transaction();
-    
-    // Call the access control function
-    console.log('🔧 [Seal] Adding move call to transaction...');
+    const client = createSuiClient();
+
+    // Call seal_approve following the official example pattern
+    // Signature: seal_approve(id: vector<u8>, policy: &AccessPolicy, subscription: &SubscriptionNFT, clock: &Clock, ctx: &TxContext)
+    const targetFn = `${pkgIdOverride ?? SEAL_ACCESS_CONTROL_PACKAGE_ID}::content_access::seal_approve`;
+    console.log('🔧 [Seal] Adding move call:', targetFn);
+
+    // Convert content ID to vector<u8> using fromHex (matches official example)
+    const idBytes = fromHex(contentIdHex);
+    console.log('🧩 [Seal] ID bytes:', { length: idBytes.length, preview: Array.from(idBytes.slice(0, 8)) });
+
     tx.moveCall({
-      target: `${SEAL_ACCESS_CONTROL_PACKAGE_ID}::content_access::can_access`,
+      target: targetFn,
       arguments: [
-        tx.object(contentPostId), // Access policy
-        tx.object(subscriptionNftId), // Subscription NFT
+        tx.pure.vector('u8', Array.from(idBytes)),
+        tx.object(accessPolicyId),
+        tx.object(subscriptionNftId),
+        tx.object(SUI_CLOCK_OBJECT_ID),
       ],
     });
 
-    // Build and serialize transaction to bytes
+    // Build transaction bytes (onlyTransactionKind for Seal verification)
     console.log('🔨 [Seal] Building transaction...');
-    const txBytes = await tx.build({ client: createSuiClient() });
+    const txBytes = await tx.build({ client, onlyTransactionKind: true });
     console.log('✅ [Seal] Transaction created:', txBytes.length, 'bytes');
     
     return txBytes;
@@ -280,7 +315,14 @@ export async function createAccessVerificationTx(
  * Check if content is encrypted (has Seal metadata)
  */
 export function isEncrypted(post: any): boolean {
-  return !!(post.fields?.encryption_metadata && post.fields?.access_policy_id);
+  const enc = !!post?.fields?.encryption_metadata;
+  const policyRaw = post?.fields?.access_policy_id ?? post?.fields?.seal_policy_id;
+  if (!enc) return false;
+  if (!policyRaw) return false;
+  if (typeof policyRaw === 'string') return policyRaw.length > 0;
+  const vec = policyRaw?.fields?.vec;
+  const some = policyRaw?.fields?.some;
+  return Array.isArray(vec) ? vec.length > 0 && !!vec[0] : some != null && String(some).length > 0;
 }
 
 /**
