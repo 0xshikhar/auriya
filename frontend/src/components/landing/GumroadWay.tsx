@@ -7,14 +7,23 @@ export default function GumroadWay() {
     <section className="py-20 md:py-32 bg-gray-50 relative overflow-hidden">
       <div className="mx-auto max-w-5xl px-4 md:px-6 relative z-10">
         <motion.h2 
-          className="text-4xl md:text-5xl font-bold text-center mb-16"
+          className="text-4xl md:text-5xl font-bold text-center mb-4"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
         >
-          You know all those great ideas you have?
+          Why Auriya is Better than others ??
         </motion.h2>
+        <motion.p
+          className="text-lg text-gray-600 text-center mb-16 max-w-3xl mx-auto"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6, delay: 0.1 }}
+        >
+          Patreon takes 20%, delays payments 7-14 days, and can ban you anytime. We give you 97%, instant settlements, and unstoppable content.
+        </motion.p>
 
         {/* Yellow pill with character */}
         <motion.div 
@@ -43,7 +52,7 @@ export default function GumroadWay() {
                 >
                   →
                 </motion.span>
-                <span className="font-bold text-base">The Auriya Way</span>
+                <span className="font-bold text-base">Walrus Storage</span>
               </motion.div>
 
               <motion.div 
@@ -60,7 +69,7 @@ export default function GumroadWay() {
                 >
                   →
                 </motion.span>
-                <span className="font-bold text-base">Start Small</span>
+                <span className="font-bold text-base">NFT Subscriptions</span>
               </motion.div>
             </div>
 
@@ -100,7 +109,7 @@ export default function GumroadWay() {
                 viewport={{ once: true }}
                 transition={{ delay: 0.3 }}
               >
-                <span className="font-bold text-base">Get Better Together</span>
+                <span className="font-bold text-base">Mysten Seal</span>
                 <motion.span 
                   className="text-2xl font-bold"
                   animate={{ x: [0, -5, 0] }}
@@ -117,7 +126,7 @@ export default function GumroadWay() {
                 viewport={{ once: true }}
                 transition={{ delay: 0.3 }}
               >
-                <span className="font-bold text-base">Learn Quickly</span>
+                <span className="font-bold text-base">zkLogin Auth</span>
                 <motion.span 
                   className="text-2xl font-bold"
                   animate={{ x: [0, -5, 0] }}
@@ -137,15 +146,35 @@ export default function GumroadWay() {
           transition={{ duration: 0.6, delay: 0.2 }}
         >
           <h2 className="text-4xl md:text-5xl font-bold text-center mb-6 bg-gradient-to-r from-black to-gray-700 bg-clip-text text-transparent">
-            Launch in minutes.
+            Launch in 5 minutes.
           </h2>
           <h2 className="text-4xl md:text-5xl font-bold text-center mb-8 bg-gradient-to-r from-black to-gray-700 bg-clip-text text-transparent">
-            Scale with blockchain.
+            Earn 97% forever.
           </h2>
 
-          <p className="text-center text-gray-700 max-w-2xl mx-auto mb-10 leading-relaxed text-lg font-medium">
-            No coding required. Connect with zkLogin, upload to Walrus, set your tiers. Your decentralized creator page is live in 5 minutes.
-          </p>
+          <div className="max-w-3xl mx-auto mb-10">
+            <p className="text-center text-gray-700 leading-relaxed text-lg font-medium mb-6">
+              No coding required. Sign in with Google (zkLogin), upload content to Walrus, set your subscription tiers. Your decentralized creator page is live instantly.
+            </p>
+            <div className="grid md:grid-cols-2 gap-4 text-left">
+              <div className="bg-white rounded-xl p-4 border-2 border-gray-200">
+                <div className="font-bold text-gray-900 mb-2">✅ Content stored forever on Walrus</div>
+                <p className="text-sm text-gray-600">Permanent, censorship-resistant storage</p>
+              </div>
+              <div className="bg-white rounded-xl p-4 border-2 border-gray-200">
+                <div className="font-bold text-gray-900 mb-2">✅ Premium content encrypted with Seal</div>
+                <p className="text-sm text-gray-600">NFT-gated access control</p>
+              </div>
+              <div className="bg-white rounded-xl p-4 border-2 border-gray-200">
+                <div className="font-bold text-gray-900 mb-2">✅ Instant SUI payments (97% to you)</div>
+                <p className="text-sm text-gray-600">No 7-14 day delays like Patreon</p>
+              </div>
+              <div className="bg-white rounded-xl p-4 border-2 border-gray-200">
+                <div className="font-bold text-gray-900 mb-2">✅ Transferable NFT subscriptions</div>
+                <p className="text-sm text-gray-600">Fans can gift or trade memberships</p>
+              </div>
+            </div>
+          </div>
 
           <div className="text-center">
             <motion.button 

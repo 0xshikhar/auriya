@@ -8,9 +8,10 @@ export default function SmallBets() {
       <div className="mx-auto max-w-6xl px-4 md:px-6">
         <div className="text-center mb-12">
           <h2 className="text-4xl md:text-5xl font-bold mb-6">
-            Don&apos;t take risks.<br />
-            <span className="text-gray-500">That&apos;s scary!</span>
+            From Patreon to Auriya<br />
+            <span className="bg-gradient-to-r from-pink-500 to-rose-500 bg-clip-text text-transparent">The Creator Revolution</span>
           </h2>
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">See why creators are switching to decentralized monetization</p>
         </div>
 
         <div className="grid md:grid-cols-2 gap-8 mb-12">
@@ -20,8 +21,8 @@ export default function SmallBets() {
             whileHover={{ y: -5 }}
           >
             <div className="mb-6">
-              <div className="inline-block bg-gray-100 rounded-2xl px-4 py-2 mb-4">
-                <p className="text-sm font-medium">Instead of selling a book...</p>
+              <div className="inline-block bg-red-100 rounded-2xl px-4 py-2 mb-4 border-2 border-red-200">
+                <p className="text-sm font-bold text-red-700">❌ Traditional Platforms (Patreon, OnlyFans, Gumroad)</p>
               </div>
             </div>
             
@@ -63,7 +64,18 @@ export default function SmallBets() {
                 </svg>
               </motion.div>
             </div>
+            <div className="bg-red-50 rounded-2xl p-6 border-2 border-red-200">
+              <h4 className="font-bold text-xl mb-3 text-red-700">Patreon</h4>
+              <ul className="text-left space-y-2 text-gray-700">
+                <li>❌ 80-85% revenue (15-20% fees)</li>
+                <li>❌ 7-14 day payment delays</li>
+                <li>❌ Can ban you anytime</li>
+                <li>❌ Platform owns your audience</li>
+                <li>❌ Content can be deleted</li>
+              </ul>
+            </div>
           </motion.div>
+          
 
           {/* Right card - Happy character */}
           <motion.div 
@@ -71,8 +83,8 @@ export default function SmallBets() {
             whileHover={{ y: -5 }}
           >
             <div className="mb-6">
-              <div className="inline-block bg-gray-100 rounded-2xl px-4 py-2 mb-4">
-                <p className="text-sm font-medium">...start by selling a blog post!</p>
+              <div className="inline-block bg-green-100 rounded-2xl px-4 py-2 mb-4 border-2 border-green-200">
+                <p className="text-sm font-bold text-green-700">✅ Auriya (Decentralized)</p>
               </div>
             </div>
             
@@ -106,16 +118,37 @@ export default function SmallBets() {
                 <rect x="65" y="150" width="30" height="15" fill="#93c5fd" stroke="#000" strokeWidth="1"/>
               </svg>
             </div>
+            <div className="bg-green-50 rounded-2xl p-6 border-2 border-green-200">
+              <h4 className="font-bold text-xl mb-3 text-green-700">Auriya</h4>
+              <ul className="text-left space-y-2 text-gray-700">
+                <li>✅ 97% revenue (3% fees only)</li>
+                <li>✅ Instant payments in SUI</li>
+                <li>✅ Unstoppable, no censorship</li>
+                <li>✅ You own everything on-chain</li>
+                <li>✅ Content stored forever on Walrus</li>
+              </ul>
+            </div>
           </motion.div>
         </div>
 
-        <div className="text-center py-12 border-t border-gray-200">
-          <h3 className="text-3xl md:text-4xl font-bold mb-6">
-            Place small bets. That&apos;s exciting!
+        <div className="text-center py-6 border-gray-200">
+          <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto mb-8">
+          
+           
+          </div>
+          <h3 className="text-3xl md:text-4xl font-bold mb-6 bg-gradient-to-r from-black to-gray-700 bg-clip-text text-transparent">
+            The Choice is Clear
           </h3>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Launch your subscription page in minutes. NFT memberships, Walrus storage, instant SUI payments. No middlemen.
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto mb-6">
+            Join the creator revolution. NFT subscriptions, Walrus storage, Mysten Seal encryption, zkLogin auth. Built on Sui.
           </p>
+          <motion.button 
+            className="bg-gradient-to-r from-black to-gray-900 text-white px-8 py-3 rounded-full font-semibold hover:shadow-xl transition text-lg"
+            whileHover={{ scale: 1.05, boxShadow: "0 20px 40px rgba(0,0,0,0.3)" }}
+            whileTap={{ scale: 0.95 }}
+          >
+            Start Creating on Auriya
+          </motion.button>
         </div>
       </div>
     </section>
