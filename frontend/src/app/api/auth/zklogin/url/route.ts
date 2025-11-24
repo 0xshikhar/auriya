@@ -16,7 +16,9 @@ export async function GET(req: Request) {
     const provider = (searchParams.get("provider") || "google").toLowerCase();
 
     const origin = getOrigin(req);
-    const redirectUri = ZKLOGIN_REDIRECT_URI || `${origin}/auth/callback`;
+    // IMPORTANT: Force a single stable redirect URI bound to origin
+    // This avoids accidental dynamic path usage like /subscribers/content
+    const redirectUri = `${origin}/auth/callback`;
 
     if (provider !== "google") {
       return NextResponse.json({ error: "Unsupported provider" }, { status: 400 });

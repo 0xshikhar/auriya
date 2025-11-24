@@ -23,7 +23,8 @@ export async function POST(req: Request) {
     }
 
     const origin = getOrigin(req);
-    const redirectUri = ZKLOGIN_REDIRECT_URI || `${origin}/auth/callback`;
+    // const redirectUri = ZKLOGIN_REDIRECT_URI || `${origin}/auth/callback`;
+    const redirectUri = `${origin}/auth/callback`;
 
     const clientId = GOOGLE_CLIENT_ID;
     const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
