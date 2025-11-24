@@ -9,6 +9,8 @@ import { useCreatePost } from '@/hooks/contracts/useCreatePost';
 import { useCreateContentRegistry } from '@/hooks/contracts/useCreateContentRegistry';
 import { useLinkContentRegistry } from '@/hooks/contracts/useLinkContentRegistry';
 import { useCreatorProfile } from '@/hooks/contracts/useCreatorProfile';
+import { useCreateAccessPolicy } from '@/hooks/contracts/useCreateAccessPolicy';
+import { useLinkSealPolicy } from '@/hooks/contracts/useLinkSealPolicy';
 import { DEFAULT_CONTENT_REGISTRY_ID } from '@/lib/constants';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { FileText, Image as ImageIcon, Video, Music, File as FileIcon, Lock, CheckCircle2, AlertCircle, Upload, Shield } from 'lucide-react';
@@ -37,11 +39,14 @@ export default function NewContentPage() {
   const [isEncrypting, setIsEncrypting] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [encryptionMetadata, setEncryptionMetadata] = useState<string | null>(null);
+  const [accessPolicyId, setAccessPolicyId] = useState<string | null>(null); // CRITICAL: Policy must be created BEFORE encryption
   const [useEncryption, setUseEncryption] = useState(true); // Enable encryption by default for gated content
 
   const { createPost, isPending } = useCreatePost();
   const { createRegistry, isPending: creatingRegistry } = useCreateContentRegistry();
   const { linkRegistry, isPending: linkingRegistry } = useLinkContentRegistry();
+  const { createPolicy, isPending: creatingPolicy } = useCreateAccessPolicy();
+  const { linkPolicy, isPending: linkingPolicy } = useLinkSealPolicy();
 
   // Load from localStorage first (most recent registry)
   useEffect(() => {
@@ -80,17 +85,54 @@ export default function NewContentPage() {
     try {
       let finalBlobId: string;
       let metadata: string | null = null;
+      let policyId: string | null = null;
       
       // Check if encryption should be used (for gated content)
       if (useEncryption && requiredTier > 0) {
+        // CRITICAL: Create AccessPolicy FIRST (required for encryption ID generation)
+        console.log('🛡️ [ContentCreation] Creating AccessPolicy BEFORE encryption...');
+        toast.info('🛡️ Creating access policy...');
+        
+        const policyRes = await createPolicy({
+          creator: currentAccount.address,
+          contentPostId: '0x0000000000000000000000000000000000000000000000000000000000000000', // Placeholder, will be linked later
+          requiredTier,
+        });
+        
+        // Extract policy ID from transaction result
+        // @ts-ignore
+        const policyObjects = policyRes?.effects?.created || [];
+        const policyObject = policyObjects.find((obj: any) => 
+          obj?.reference?.objectId && obj?.owner?.Shared
+        );
+        
+        if (!policyObject?.reference?.objectId) {
+          throw new Error('Failed to create AccessPolicy - no object ID returned');
+        }
+        
+        const createdPolicyId = policyObject.reference.objectId;
+        policyId = createdPolicyId;
+        setAccessPolicyId(createdPolicyId);
+        console.log('✅ [ContentCreation] AccessPolicy created:', createdPolicyId);
+        toast.success(`Access policy created: ${createdPolicyId.slice(0, 10)}...`);
+        
+        // Wait for policy to be indexed
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        
+        // NOW encrypt content using the policy ID as prefix
         console.log('🔐 [ContentCreation] Encrypting content with Seal...');
         toast.info('🔐 Encrypting content with Mysten Seal...');
         
-        // Encrypt content
+        // Ensure policyId is not null before encryption
+        if (!policyId) {
+          throw new Error('Policy ID is null after creation');
+        }
+        
         const { encryptedData, encryptionMetadata } = await encryptContent(
           file,
           requiredTier,
-          currentAccount.address
+          currentAccount.address,
+          policyId // CRITICAL: Pass policy ID for encryption ID generation
         );
         
         setIsEncrypting(false);
@@ -134,6 +176,9 @@ export default function NewContentPage() {
       
       setBlobId(finalBlobId);
       setEncryptionMetadata(metadata);
+      if (policyId) {
+        setAccessPolicyId(policyId);
+      }
       setIsUploading(false);
       
     } catch (error: any) {
@@ -213,11 +258,51 @@ export default function NewContentPage() {
       });
       
       console.log('✅ [ContentCreation] Post published successfully!');
+      console.log('📄 [ContentCreation] Transaction result:', res);
       
       // @ts-ignore
       const digest = res?.digest || null;
       setTxDigest(digest);
       toast.success('Post published successfully!');
+
+      // If encrypted, link the pre-created AccessPolicy to the post
+      if (encryptionMetadata && requiredTier > 0 && accessPolicyId) {
+        try {
+          console.log('🔗 [ContentCreation] Linking AccessPolicy to post...');
+          
+          // Extract post ID from transaction result
+          // @ts-ignore
+          const createdObjects = res?.effects?.created || [];
+          const postObject = createdObjects.find((obj: any) => 
+            obj?.reference?.objectId && obj?.owner?.Shared
+          );
+          
+          if (!postObject?.reference?.objectId) {
+            console.warn('⚠️ [ContentCreation] Could not extract post ID from transaction result');
+            toast.warning('Post created but could not link access policy. Decryption may fail.');
+          } else {
+            const postId = postObject.reference.objectId;
+            console.log('📄 [ContentCreation] Extracted post ID:', postId);
+            
+            // Wait for post to be indexed
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            
+            // Link the pre-created policy to the post
+            console.log('🔗 [ContentCreation] Linking policy', accessPolicyId, 'to post', postId);
+            toast.info('Linking access policy...');
+            await linkPolicy({
+              postId,
+              sealPolicyId: accessPolicyId,
+            });
+            
+            console.log('✅ [ContentCreation] Policy linked to post successfully!');
+            toast.success('Access policy linked to post!');
+          }
+        } catch (policyError: any) {
+          console.error('❌ [ContentCreation] Failed to link AccessPolicy:', policyError);
+          toast.error(`Policy linking failed: ${policyError.message || 'Unknown error'}. Content created but decryption may not work.`);
+        }
+      }
 
       // Persist the last used/created registry for the content page fallback
       try {
@@ -249,6 +334,9 @@ export default function NewContentPage() {
       setTitle('');
       setDescription('');
       setBlobId('');
+      setAccessPolicyId(null);
+      setEncryptionMetadata(null);
+      setSelectedFile(null);
       
     } catch (e: any) {
       console.error('Content creation error:', e);
