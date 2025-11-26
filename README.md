@@ -1,12 +1,12 @@
 <div align="center">
 
 # 🌟 Auriya
-### **The Decentralized Creator Economy Platform**
+### ** Decentralized Permissionless Creator Economy Platform on Sui**
 
 **Walrus Haulout Hackathon 2025**  
 **Track: Data Marketplaces | Data Security & Privacy**
 
-*Empowering creators to own their content, audience, and revenue—forever.*
+*Empowering creators with permanent content storage, encrypted access control, and 97% revenue share*
 
 [![Sui](https://img.shields.io/badge/Sui-Blockchain-blue)](https://sui.io)
 [![Walrus](https://img.shields.io/badge/Walrus-Storage-purple)](https://walrus.site)
@@ -14,36 +14,31 @@
 [![Next.js](https://img.shields.io/badge/Next.js-15-black)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)](https://www.typescriptlang.org/)
 
-**🎥 [Video Demo](#) • 📊 [Pitch Deck](./documents/PITCH_DECK.md) • 🚀 [Live Demo](#)**
+**🎥 [Video Demo](https://www.loom.com/share/18f2a5d9b7be47aa9c418b25c26610c8) • 📊 [Pitch Deck](./PITCH_DECK.md) • 🚀 [Live Demo](https://auriya-chi.vercel.app)**
 
 </div>
 
 ---
 
 ## 📋 Table of Contents
-- [Problem Statement](#-problem-statement)
-- [The Auriya Solution](#-the-auriya-solution)
-- [Unique Value Propositions](#-unique-value-propositions)
-- [Detailed Platform Comparison](#-detailed-platform-comparison)
-- [How It Works](#-how-it-works)
-- [Detailed User Flows](#-detailed-user-flows)
+- [Problem](#-problem)
+- [Solution](#-solution)
+- [Platform Comparison](#-platform-comparison)
 - [Technical Architecture](#-technical-architecture)
-- [Technical Implementation Details](#-technical-implementation-details)
-- [Sui Stack Integration](#-sui-stack-integration)
-- [Smart Contract Specifications](#-smart-contract-specifications)
+- [Walrus Integration](#-walrus-integration)
+- [Seal Integration](#-seal-integration)
+- [Smart Contracts](#-smart-contracts)
+- [User Flows](#-user-flows)
 - [Key Features](#-key-features)
-- [Hackathon Track Alignment](#-hackathon-track-alignment)
-- [Market Opportunity](#-market-opportunity)
 - [Getting Started](#-getting-started)
 - [Roadmap](#-roadmap)
 
 ---
 
-## 🚨 Problem Statement
+## 💡 Problem
 
-### **The Creator Economy is Broken**
-
-The global creator economy is worth **$104B+**, yet creators face systemic challenges:
+### **The Problem**
+The $104B+ creator economy suffers from:
 
 **1. Exploitative Platform Fees**
 - Patreon: **15%** total fees (platform + payment processing)
@@ -73,506 +68,75 @@ The global creator economy is worth **$104B+**, yet creators face systemic chall
 - Fans can't transfer or resell subscriptions
 - No secondary market for access rights
 
----
 
-## 💡 The Auriya Solution
+### **The Solution: Auriya**
+Decentralized creator platform on Sui where creators mint **Subscription NFTs** for tiered access to content stored permanently on **Walrus**, with **Seal** encryption for premium content.
 
-**Auriya = Decentralized Patreon on Sui Stack**
+**Unique Value Propositions:**
 
-Creators mint **Subscription NFTs** that grant tiered access to exclusive content stored permanently on **Walrus**. Smart contracts enforce access rules on-chain, and **Seal** encrypts premium content.
+🎯 **For Creators (Data Producers)**
+- **97% revenue share** - Keep nearly all earnings (vs 55-90% on Web2)
+- **Instant settlements** - On-chain payments in 3-5 seconds (vs 7-14 days)
+- **True ownership** - Content + audience data fully portable
+- **Censorship-proof** - No platform can ban you or delete content
+- **Flexible pricing** - Set your own tier prices, change anytime
+- **Global reach** - No geographic restrictions or payment processor limits
 
-### **Why Auriya is 10x Better**
+💎 **For Subscribers (Data Consumers)**
+- **Own your access** - Subscription NFTs are yours to keep, transfer, or sell
+- **Transparent pricing** - All fees visible on-chain, no hidden charges
+- **Privacy-first** - zkLogin means no email required, anonymous access
+- **Permanent content** - Access paid content forever, can't be deleted
+- **Composable NFTs** - Use subscription across multiple dApps
+- **Secondary market** - Sell unused subscriptions on NFT marketplaces
 
-| Feature | Patreon | Auriya |
-|---------|---------|--------|
-| **Platform Fee** | 15-20% | **3%** |
-| **Censorship Risk** | High | **None** |
-| **Content Ownership** | Platform | **Creator** |
-| **Payment Speed** | 7-14 days | **Instant** |
-| **Subscription Portability** | No | **Yes (NFTs)** |
-| **Privacy** | Email required | **zkLogin** |
-| **Content Permanence** | Can be deleted | **Forever (Walrus)** |
-| **Secondary Market** | No | **Yes** |
+🔐 **Platform Advantages**
+- **Decentralized storage** - Walrus ensures content lives forever
+- **Smart contract automation** - Trustless revenue splits, no intermediaries
+- **Threshold encryption** - Seal provides NFT-gated content access
+- **Web2 UX** - zkLogin removes crypto complexity for mainstream users
+- **Scalable** - Sui's 10,000+ TPS supports millions of transactions
 
----
-
-## 🎯 Unique Value Propositions
-
-### **1. Data Producers (Creators)**
-
-#### **Permanent, Censorship-Resistant Content**
-- Upload content to Walrus (decentralized blob storage)
-- Content stored across distributed network of nodes
-- Cryptographic blob IDs ensure verifiable integrity
-- **No single entity can delete or censor content**
-- Content persists even if Auriya platform shuts down
-
-#### **Flexible Tiered Pricing**
-- **Bronze Tier**: $5/month - Access to basic exclusive content
-- **Silver Tier**: $10/month - Access to premium tutorials, behind-the-scenes
-- **Gold Tier**: $20/month - Full access + 1-on-1 calls, early releases
-- Creators set their own pricing per tier
-- On-chain pricing ensures transparency
-
-#### **Direct Revenue & True Ownership**
-- Earn **97% of revenue** (~3% gas fees only)
-- Payments flow directly to creator wallet (instant settlement)
-- Own subscriber data (on-chain, portable)
-- No platform lock-in (content + audience data exportable)
-- Revenue dashboard with real-time analytics
-
-#### **No Platform Lock-In**
-- CreatorProfile is a transferable Sui object
-- Walrus blob IDs are portable across platforms
-- Subscriber list is on-chain (can migrate to any dApp)
-- SuiNS names follow creator everywhere
-
----
-
-### **2. Data Consumers (Subscribers)**
-
-#### **Pay Once, Own Forever**
-- Purchase Subscription NFT (one-time transaction)
-- NFT grants access to all tier-appropriate content
-- Access persists as long as NFT is valid (monthly renewal)
-- No recurring credit card charges (crypto-native)
-
-#### **Provable Access Rights**
-- SubscriptionNFT is a Sui object in your wallet
-- Cryptographically verifiable ownership
-- Smart contracts enforce access rules (trustless)
-- No platform can revoke access arbitrarily
-
-#### **Transferable Subscriptions**
-- NFTs are transferable Sui objects
-- Gift subscription to a friend (transfer NFT)
-- Sell subscription on NFT marketplaces (Clutchy, Hyperspace)
-- Secondary market creates liquidity for access rights
-
-#### **Content Can't Be Censored**
-- Content stored on Walrus (decentralized)
-- Platform can't delete content you paid for
-- Creator can't remove content retroactively
-- Permanent access to purchased content
-
----
-
-### **3. 10x Better Than Centralized Platforms**
-
-#### **vs Patreon**
-- **Fees**: Platform takes 20-30% cut → Auriya: **~3% gas fees**
-- **Censorship**: Can ban creators/delete content → Auriya: **Censorship-resistant**
-- **Ownership**: Platform owns relationship → Auriya: **Creator owns everything**
-- **Payments**: 7-14 day delays → Auriya: **Instant on-chain**
-- **Portability**: Locked to platform → Auriya: **Fully portable**
-
-#### **vs YouTube**
-- **Monetization**: Demonetization risk, 45% cut → Auriya: **No demonetization, 3% fees**
-- **Control**: Algorithm controls reach → Auriya: **Direct creator-fan relationship**
-- **Censorship**: Content ID, community strikes → Auriya: **Unstoppable**
-
-#### **vs Substack**
-- **Fees**: 10% platform fee → Auriya: **3% gas fees**
-- **Ownership**: Platform owns email list → Auriya: **Creator owns on-chain data**
-- **Media**: Text-focused, limited media → Auriya: **Full multimedia support**
-
-#### **vs Gumroad**
-- **Censorship**: Can ban creators → Auriya: **Unstoppable**
-- **Fees**: 10% + payment processing → Auriya: **3% total**
-- **Subscriptions**: Limited subscription features → Auriya: **NFT-based, composable**
-
----
-
-## 📊 Detailed Platform Comparison
+## 📊 Creator Platforms Comparison
 
 ### **Feature-by-Feature Analysis**
 
-| Feature | Patreon | OnlyFans | Substack | YouTube | Gumroad | **Auriya** |
-|---------|---------|----------|----------|---------|---------|------------|
-| **Platform Fee** | 5-12% | 20% | 10% | 45% | 10% | **3%** ✅ |
-| **Payment Processing** | 2.9% + $0.30 | Included | Included | Included | 3.5% + $0.30 | **Gas only** ✅ |
-| **Total Creator Revenue** | 85-92% | 80% | 90% | 55% | 86.5% | **97%** ✅ |
+| Feature | Patreon | OnlyFans | YouTube | Substack | Gumroad | **Auriya** |
+|---------|---------|----------|---------|----------|---------|------------|
+| **Total Creator Revenue** | 85-92% | 80% | 55% | 90% | 86.5% | **97%** ✅ |
 | **Payment Speed** | 7-14 days | 7-21 days | Monthly | Monthly | 7 days | **Instant** ✅ |
-| **Minimum Payout** | $5 | $20 | $50 | $100 | $10 | **$0** ✅ |
-| **Censorship Risk** | High | Very High | Medium | Very High | High | **None** ✅ |
+| **Censorship Risk** | High | Very High | Very High | Medium | High | **None** ✅ |
 | **Content Ownership** | Platform | Platform | Platform | Platform | Platform | **Creator** ✅ |
-| **Audience Ownership** | Platform | Platform | Platform | Platform | Platform | **Creator** ✅ |
-| **Content Permanence** | Can be deleted | Can be deleted | Can be deleted | Can be deleted | Can be deleted | **Forever** ✅ |
-| **Subscription Portability** | No | No | No | No | No | **Yes (NFTs)** ✅ |
-| **Secondary Market** | No | No | No | No | No | **Yes** ✅ |
-| **Privacy (Creator)** | Email required | KYC required | Email required | Email required | Email required | **zkLogin** ✅ |
-| **Privacy (Subscriber)** | Email required | Email required | Email required | Email required | Email required | **zkLogin** ✅ |
-| **Geographic Restrictions** | Yes | Yes | Yes | Yes | Yes | **None** ✅ |
-| **Deplatforming Examples** | 200+ (2021) | Adult ban attempt (2022) | Rare | Thousands | Multiple | **Impossible** ✅ |
-| **Data Portability** | Limited export | None | Email list only | None | Limited | **Full** ✅ |
-| **Composability** | No | No | No | No | No | **Yes (dApps)** ✅ |
-| **Transparent Fees** | Hidden fees | Hidden fees | Hidden fees | Hidden fees | Hidden fees | **On-chain** ✅ |
-| **Smart Contract Logic** | No | No | No | No | No | **Yes** ✅ |
-| **Decentralized Storage** | No (AWS) | No (AWS) | No (AWS) | No (GCP) | No (AWS) | **Yes (Walrus)** ✅ |
+| **Content Permanence** | Can be deleted | Can be deleted | Can be deleted | Can be deleted | Can be deleted | **Forever (Walrus)** ✅ |
+| **Transferable Access (NFTs)** | No | No | No | No | No | **Yes** ✅ |
+| **Privacy & Auth** | Email | KYC | Email | Email | Email | **zkLogin** ✅ |
+| **Decentralized Storage** | No (AWS) | No (AWS) | No (GCP) | No (AWS) | No (AWS) | **Yes (Walrus)** ✅ |
+| **Encrypted Content** | No | No | No | No | No | **Yes (Seal)** ✅ |
+| **Data Portability** | Limited | None | None | Email list only | Limited | **Full** ✅ |
 
 ### **Economic Impact Example**
 
-**Scenario**: Creator earns $10,000/month from 200 subscribers @ $50/month
+**Scenario**: Creator earns $10,000/month from 200 subscribers
 
 | Platform | Gross Revenue | Platform Fee | Payment Processing | Net to Creator | Creator % |
 |----------|---------------|--------------|-------------------|----------------|----------|
 | **Patreon** | $10,000 | $800 (8%) | $290 (2.9%) | **$8,910** | 89.1% |
 | **OnlyFans** | $10,000 | $2,000 (20%) | $0 | **$8,000** | 80.0% |
-| **Substack** | $10,000 | $1,000 (10%) | $0 | **$9,000** | 90.0% |
 | **YouTube** | $10,000 | $4,500 (45%) | $0 | **$5,500** | 55.0% |
+| **Substack** | $10,000 | $1,000 (10%) | $0 | **$9,000** | 90.0% |
 | **Gumroad** | $10,000 | $1,000 (10%) | $350 (3.5%) | **$8,650** | 86.5% |
 | **Auriya** | $10,000 | $0 | **$300 (~3% gas)** | **$9,700** | **97.0%** ✅ |
 
-**Auriya Advantage**: Creator earns **$890-$4,300 more per month** than competitors!
+**💰 Auriya Advantage**: Creator earns **$700-$4,200 MORE per month** than competitors!
 
----
+### **Real-World Deplatforming Examples**
 
-## 🎬 How It Works
+- **Patreon (2021)**: Banned 200+ creators for "community guidelines" violations
+- **OnlyFans (2021)**: Attempted to ban adult content (reversed after backlash)
+- **YouTube**: Thousands of creators demonetized annually
+- **Substack**: Rare but possible for controversial content
+- **Auriya**: **Impossible to deplatform** - content on Walrus is permanent
 
-### **For Creators (5 minutes to first earning)**
-
-1. **Sign Up** → zkLogin with Google → Get Sui address (no seed phrase)
-2. **Create Profile** → Upload avatar to Walrus → Deploy CreatorProfile contract
-3. **Set Tiers** → Bronze ($5), Silver ($10), Gold ($25) → Deploy MembershipTiers
-4. **Upload Content** → Store on Walrus → Set tier access → Publish ContentPost
-5. **Earn Revenue** → Fans subscribe → **97% goes directly to creator wallet**
-
-### **For Fans (3 minutes to access)**
-
-1. **Discover** → Browse creators → View profile & preview posts
-2. **Sign In** → zkLogin with Google → Sui wallet generated
-3. **Subscribe** → Choose tier → Mint SubscriptionNFT (one transaction)
-4. **Access** → All tier-appropriate content unlocked instantly
-5. **Engage** → Comment, like, tip creators
-
-### **Data Flow**
-
-```
-Creator uploads content → Walrus (permanent storage)
-                       ↓
-                    Sets tier requirement (Bronze/Silver/Gold)
-                       ↓
-                    Fan purchases Subscription NFT
-                       ↓
-                    Smart contract verifies NFT ownership
-                       ↓
-                    Seal decrypts content → Fan accesses from Walrus
-```
-
----
-
-## 🔄 Detailed User Flows
-
-### **Creator Onboarding Flow (5 minutes)**
-
-#### **Step 1: Authentication (30 seconds)**
-```
-1. Visit auriya.io
-2. Click "Become a Creator"
-3. Click "Sign in with Google"
-4. Google OAuth flow (standard Web2 UX)
-5. zkLogin generates Sui address deterministically
-6. No seed phrase, no MetaMask installation
-7. Wallet ready with 0 SUI balance
-```
-
-**Technical Details**:
-- zkLogin uses JWT from Google OAuth
-- Ephemeral key pair generated in browser
-- Salt stored in browser localStorage
-- Sui address derived from: `hash(sub, aud, salt)`
-- User can recover wallet with same Google account
-
----
-
-#### **Step 2: Profile Creation (2 minutes)**
-```
-1. Fill profile form:
-   - Display name: "Alice the Artist"
-   - Bio: "Digital artist creating NFT art tutorials"
-   - Category: "Art & Design"
-   - Social links: Twitter, Instagram, Discord
-
-2. Upload avatar (JPEG, 500KB)
-   → Uploaded to Walrus Publisher
-   → Returns blob ID: "abc123..."
-   → Stored in browser state
-
-3. Upload banner (JPEG, 2MB)
-   → Uploaded to Walrus Publisher
-   → Returns blob ID: "def456..."
-
-4. Click "Create Profile"
-   → Calls smart contract: creator_profile::create_profile()
-   → Transaction includes:
-      - display_name: "Alice the Artist"
-      - bio: "Digital artist..."
-      - avatar_walrus_id: "abc123..."
-      - banner_walrus_id: "def456..."
-      - category: "Art & Design"
-   → Gas fee: ~0.01 SUI (~$0.01)
-   → Transaction confirmed in 3-5 seconds
-   → CreatorProfile object created with ID: 0x789...
-```
-
-**Data Model Reference**: `backend/move/creator_profile/sources/creator_profile.move`
-
----
-
-#### **Step 3: Tier Configuration (1 minute)**
-```
-1. Navigate to "Membership Tiers" settings
-2. Configure Bronze tier:
-   - Name: "Bronze Supporter"
-   - Price: 5 SUI/month
-   - Benefits: "Access to basic tutorials"
-   - Tier level: 1
-
-3. Configure Silver tier:
-   - Name: "Silver Patron"
-   - Price: 10 SUI/month
-   - Benefits: "All Bronze + premium tutorials"
-   - Tier level: 2
-
-4. Configure Gold tier:
-   - Name: "Gold VIP"
-   - Price: 20 SUI/month
-   - Benefits: "All Silver + 1-on-1 calls"
-   - Tier level: 3
-
-5. Click "Save Tiers"
-   → Calls: membership_tiers::create_tiers()
-   → Gas fee: ~0.01 SUI
-   → MembershipTiers object created
-```
-
----
-
-#### **Step 4: First Content Upload (1.5 minutes)**
-```
-1. Click "Create Post"
-2. Upload video: "NFT Art Tutorial - Part 1" (50MB MP4)
-   → Chunked upload to Walrus Publisher
-   → Progress bar: 0% → 100%
-   → Returns blob ID: "ghi789..."
-
-3. Fill post details:
-   - Title: "NFT Art Tutorial - Part 1"
-   - Description: "Learn to create NFT art in Blender"
-   - Required tier: Silver (level 2)
-   - Tags: ["tutorial", "nft", "blender"]
-
-4. Click "Publish"
-   → Calls: content::create_post()
-   → Transaction data:
-      - creator: 0x789...
-      - walrus_blob_id: "ghi789..."
-      - title: "NFT Art Tutorial - Part 1"
-      - required_tier: 2
-   → Gas fee: ~0.005 SUI
-   → ContentPost object created with ID: 0xabc...
-```
-
-**Content Post Schema**: `backend/move/content/sources/content.move`
-
----
-
-#### **Step 5: Earning Revenue (Instant)**
-```
-1. Fan "Bob" visits Alice's profile
-2. Sees locked content (Silver tier required)
-3. Clicks "Subscribe to Silver - 10 SUI/month"
-4. Approves transaction
-   → Calls: subscription::purchase_subscription()
-   → Bob pays 10 SUI
-   → Revenue distribution:
-      - Alice receives: 9.7 SUI (97%)
-      - Platform receives: 0.3 SUI (3%)
-   → SubscriptionNFT minted to Bob's wallet
-   → NFT details:
-      - creator: Alice's address
-      - subscriber: Bob's address
-      - tier_id: 2 (Silver)
-      - expires_at: now + 30 days
-      - auto_renew: true
-
-5. Alice's dashboard updates:
-   - Total subscribers: 0 → 1
-   - Total revenue: 0 → 9.7 SUI
-   - New subscriber notification
-
-6. Bob's view updates:
-   - All Silver+ content unlocked
-   - Can now watch "NFT Art Tutorial - Part 1"
-```
-
----
-
-### **Fan Subscription Flow (3 minutes)**
-
-#### **Step 1: Discovery (30 seconds)**
-```
-1. Visit auriya.io
-2. Browse "Trending Creators" section
-3. Filter by category: "Art & Design"
-4. Click on "Alice the Artist" profile
-5. See profile:
-   - Avatar & banner (loaded from Walrus)
-   - Bio & social links
-   - Subscriber count: 42
-   - Tier options: Bronze/Silver/Gold
-   - Content preview: 3 free posts
-   - Locked content: 15 premium posts (blurred)
-```
-
----
-
-#### **Step 2: Authentication (30 seconds)**
-```
-1. Click "Subscribe" button
-2. Prompted: "Sign in to continue"
-3. Click "Sign in with Google"
-4. Google OAuth flow
-5. zkLogin generates Sui wallet
-6. Redirected back to Alice's profile
-7. Wallet address shown in header: 0xdef...
-```
-
----
-
-#### **Step 3: Subscription Purchase (1 minute)**
-```
-1. Click "Subscribe to Silver - 10 SUI/month"
-2. Modal appears:
-   - Tier: Silver Patron
-   - Price: 10 SUI/month (~$10)
-   - Benefits:
-     ✓ Access to 15 premium posts
-     ✓ All Bronze tier content
-     ✓ Monthly exclusive updates
-   - Auto-renewal: ON (toggle available)
-   - Total: 10 SUI
-
-3. Click "Confirm Subscription"
-4. Transaction approval:
-   - Function: subscription::purchase_subscription()
-   - Gas estimate: 0.01 SUI
-   - Total cost: 10.01 SUI
-
-5. Problem: Wallet has 0 SUI
-   → "Insufficient balance" error
-   → Click "Get SUI" button
-   → Redirected to faucet (testnet) or on-ramp (mainnet)
-   → Receive 20 SUI
-
-6. Retry "Confirm Subscription"
-7. Transaction submitted
-8. Confirmation in 3-5 seconds
-9. Success notification:
-   "Welcome to Alice's Silver tier! 🎉"
-```
-
----
-
-#### **Step 4: Content Access (Instant)**
-```
-1. Page refreshes automatically
-2. All Silver+ content unlocked:
-   - 15 premium posts now visible
-   - Blur effect removed
-   - "🔓 Unlocked" badge shown
-
-3. Click on "NFT Art Tutorial - Part 1"
-4. Content viewer loads:
-   - Smart contract checks:
-     → Does Bob own SubscriptionNFT? YES
-     → NFT tier (2) >= required tier (2)? YES
-     → NFT expired? NO
-   - Access granted
-
-5. Video player loads:
-   - Source: https://aggregator.walrus-testnet.walrus.space/v1/ghi789...
-   - Video streams from Walrus
-   - Playback controls: play, pause, seek, fullscreen
-   - Quality: 1080p, 720p, 480p (adaptive)
-
-6. Engagement features:
-   - Like button (increments on-chain counter)
-   - Comment section (stored on-chain)
-   - Share button (generates referral link)
-```
-
----
-
-#### **Step 5: Subscription Management (Ongoing)**
-```
-1. Navigate to "My Subscriptions" page
-2. See active subscriptions:
-   - Alice the Artist - Silver tier
-     - Expires: 29 days
-     - Auto-renew: ON
-     - Actions: [Cancel] [Transfer] [Sell]
-
-3. Option A: Cancel subscription
-   → Toggle auto-renew OFF
-   → Subscription expires in 29 days
-   → No refund (already consumed content)
-
-4. Option B: Transfer to friend
-   → Click "Transfer"
-   → Enter friend's Sui address: 0xfriend...
-   → Approve transaction
-   → SubscriptionNFT transferred
-   → Friend now has access
-
-5. Option C: Sell on marketplace
-   → Click "Sell on Clutchy"
-   → Set price: 8 SUI (20% discount)
-   → List on NFT marketplace
-   → Buyer purchases → NFT transferred
-   → Seller receives 8 SUI
-```
-
----
-
-### **Content Viewing Flow with Seal Encryption**
-
-#### **Premium Content (Gold Tier Only)**
-```
-1. Alice uploads exclusive 1-on-1 call recording
-2. Before uploading to Walrus:
-   → Content encrypted with Seal
-   → Access policy:
-      - required_nft_type: SubscriptionNFT
-      - min_tier: 3 (Gold)
-      - creator: Alice's address
-   → Encrypted blob uploaded to Walrus
-   → Seal policy ID: "seal_xyz..."
-
-3. ContentPost created:
-   - walrus_blob_id: "encrypted_blob_123..."
-   - seal_policy_id: "seal_xyz..."
-   - required_tier: 3
-
-4. Bob (Silver tier) tries to access:
-   → Smart contract check: tier 2 < required tier 3
-   → Access denied
-   → Shows upgrade prompt: "Upgrade to Gold for $20/month"
-
-5. Charlie (Gold tier) accesses:
-   → Smart contract check: tier 3 >= required tier 3
-   → Access granted
-   → Frontend fetches encrypted blob from Walrus
-   → Calls Seal decryption:
-      - Proof: Charlie's SubscriptionNFT
-      - Policy: seal_xyz...
-   → Seal verifies NFT ownership & tier
-   → Decryption key released
-   → Content decrypted client-side
-   → Video plays in browser
-```
-
----
 
 ## 🏗️ Technical Architecture
 
@@ -581,132 +145,107 @@ Creator uploads content → Walrus (permanent storage)
 │                    AURIYA PLATFORM                           │
 ├─────────────────────────────────────────────────────────────┤
 │                                                               │
-│  FRONTEND (Next.js 15 + TypeScript + Tailwind)              │
-│  • Landing Page  • Creator Dashboard  • Fan Portal          │
-│  • Content Viewer  • Subscription Management                │
+│  FRONTEND (Next.js 15 + TypeScript)                          │
+│  • Creator Dashboard  • Landing Page Builder                 │
+│  • Content Viewer  • Subscription Management                 │
+│  • Direct Donations                                          │
 │                                                               │
-│  INTEGRATION LAYER                                            │
-│  • @mysten/dapp-kit  • Walrus Client  • Seal Client         │
-│  • zkLogin (Enoki)  • SuiNS Resolver                        │
-│                                                               │
-│  BLOCKCHAIN (Sui Network)                                     │
+│  BLOCKCHAIN LAYER (Sui Network)                              │
 │  ┌───────────────────────────────────────────────┐          │
-│  │  Smart Contracts (Sui Move)                   │          │
-│  │  • creator_profile.move                       │          │
-│  │  • subscription.move (NFT-based access)       │          │
-│  │  • content.move (Walrus references)           │          │
-│  │  • membership_tiers.move (pricing)            │          │
-│  │  • landing_page.move (customization)          │          │
+│  │  Smart Contracts (Move)                       │          │
+│  │  • creator_profile.move - Identities          │          │
+│  │  • subscription.move - NFT access            │          │
+│  │  • content.move - Content registry            │          │
+│  │  • creator_landing.move - Landing pages      │          │
+│  │  • content_access.move - Seal integration    │          │
 │  └───────────────────────────────────────────────┘          │
 │                                                               │
 │  STORAGE & ENCRYPTION                                         │
 │  ┌──────────────┐              ┌──────────────┐            │
 │  │   Walrus     │              │     Seal     │            │
-│  │  • Avatars   │              │  • Access    │            │
-│  │  • Banners   │              │    policies  │            │
-│  │  • Posts     │              │  • Decrypt   │            │
-│  │  • Videos    │              │    keys      │            │
+│  │  • Content   │              │  • Access    │            │
+│  │  • Images    │              │    policies  │            │
+│  │  • Landing   │              │  • Decrypt   │            │
+│  │    pages     │              │    keys      │            │
 │  └──────────────┘              └──────────────┘            │
 │                                                               │
 └─────────────────────────────────────────────────────────────┘
 ```
 
----
+### **Data Flow**
 
-## ⚙️ Technical Implementation Details
-
-### **Frontend Architecture**
-
-#### **Tech Stack**
-- **Framework**: Next.js 15 (App Router with React Server Components)
-- **Language**: TypeScript 5.3 (strict mode)
-- **Styling**: Tailwind CSS 3.4 + Shadcn UI components
-- **State Management**: 
-  - React Query (server state)
-  - Zustand (client state)
-  - @mysten/dapp-kit (wallet state)
-- **Blockchain Integration**: @mysten/sui.js v1.0+
-- **Authentication**: Enoki zkLogin SDK
-
-#### **Key Components**
-
-**1. Walrus Upload Component**
-- **Path**: `frontend/src/lib/walrus/upload.ts`
-- **Function**: `uploadToWalrus(file: File)`
-- **Features**: Chunked upload for large files (10MB chunks), progress tracking, blob ID retrieval
-
-**2. Access Control Hook**
-- **Path**: `frontend/src/hooks/useContentAccess.ts`
-- **Function**: `useContentAccess(contentId: string)`
-- **Features**: NFT tier verification, expiry checks, creator validation
-
-**3. Smart Contract Integration**
-- **Path**: `frontend/src/lib/contracts/subscription.ts`
-- **Function**: `purchaseSubscription(tierConfig, payment, signAndExecute)`
-- **Features**: 97/3 revenue split, NFT minting, instant settlement
+1. **Content Upload**: Creator → Seal Encryption (if gated) → Walrus Storage → Blob ID
+2. **On-Chain Storage**: Blob ID + Metadata → Sui Smart Contract
+3. **Access Control**: Fan → Subscription NFT → Seal Verification → Content Decryption
+4. **Revenue**: Fan Payment → Smart Contract → 97% Creator, 3% Platform
 
 ---
 
-### **Backend Smart Contracts (Sui Move)**
 
-#### **Contract Architecture**
+## 🐋 Walrus Integration
 
-```
-auriya/
-├── creator_profile/
-│   ├── Move.toml
-│   └── sources/
-│       └── creator_profile.move
-├── subscription/
-│   ├── Move.toml
-│   └── sources/
-│       └── subscription.move
-├── content/
-│   ├── Move.toml
-│   └── sources/
-│       └── content.move
-├── membership_tiers/
-│   ├── Move.toml
-│   └── sources/
-│       └── membership_tiers.move
-└── landing_page/
-    ├── Move.toml
-    └── sources/
-        └── landing_page.move
-```
+### **Walrus Usage Across Platform**
 
-#### **Deployment Process**
+| Feature | Component | Walrus Usage |
+|---------|-----------|--------------|
+| **Profile Photos** | `WalrusUploader` | Avatar & banner images → Walrus blob IDs stored in `CreatorProfile` |
+| **Landing Pages** | `useLandingPage` | Full landing page JSON → Walrus, blob ID in `LandingPageConfig` |
+| **Content Posts** | `useCreatePost` | Videos, images, files → Walrus, blob ID in `ContentPost` |
+| **Encrypted Content** | `encryptContent` | Seal-encrypted data → Walrus, blob ID + encryption metadata on-chain |
 
-1. Build contracts: `sui move build`
-2. Run tests: `sui move test`
-3. Deploy to testnet: `sui client publish --gas-budget 100000000`
-4. Save package IDs for frontend integration
+### **Storage Breakdown**
+
+| Data Type | Storage Location | Size | Cost (5 epochs) |
+|-----------|------------------|------|-----------------|
+| Profile Photo | Walrus | ~500KB | ~$0.005 |
+| Cover Photo | Walrus | ~1MB | ~$0.01 |
+| Landing Page JSON | Walrus | ~10KB | ~$0.0001 |
+| Video Content | Walrus | ~50MB | ~$0.50 |
+| **Blob ID Reference** | **Sui Blockchain** | **~100 bytes** | **Gas fee only** |
+
+**Result**: 99.98% of data on Walrus, 0.02% on-chain (references only)
+
+### **Key Files**
+
+1. **`frontend/src/lib/walrus.ts`** - Upload/download functions
+2. **`frontend/src/components/walrus/WalrusUploader.tsx`** - Upload UI component
+3. **`frontend/src/app/dashboard/setup/page.tsx`** - Profile creation with Walrus
+4. **`frontend/src/app/dashboard/landing/page.tsx`** - Landing page builder with Walrus
+5. **`frontend/src/app/dashboard/content/new/page.tsx`** - Content upload with Walrus
 
 ---
 
-### **Walrus Integration Details**
+## 🔐 Seal Integration
 
-#### **Upload Flow**
-1. Client-side file selection
-2. Upload to Walrus Publisher → Get blob ID
-3. Store blob ID on-chain via `createContentPost()`
-4. Retrieve via Aggregator: `${AGGREGATOR_URL}/v1/${blobId}`
+### **Key Files**
 
-#### **Storage Economics**
-- **Cost**: ~$0.01 per MB per epoch (30 days)
-- **Epochs**: Content stored for 5 epochs (150 days) by default
-- **Renewal**: Creators can extend storage by paying additional epochs
-- **Permanence**: Once uploaded, content can't be deleted (only expire)
+1. **`frontend/src/lib/seal.ts`** - Seal client, encrypt/decrypt functions
+2. **`frontend/src/app/dashboard/content/new/page.tsx`** - Encryption during upload
+3. **`frontend/src/app/creators/[address]/posts/[id]/page.tsx`** - Decryption for viewing
+4. **`backend/move/seal_access/sources/content_access.move`** - Access policy contract
 
-#### **Performance Optimization**
-- **Lazy Loading**: Load blob IDs on-demand
-- **Caching**: Cache blob URLs in browser (24h TTL)
-- **CDN**: Walrus Aggregators act as CDN nodes
-- **Compression**: Videos transcoded to multiple qualities
 
----
+### **Seal Usage in Platform**
 
-### **Seal Encryption Integration**
+| Step | Component | Seal Function |
+|------|-----------|---------------|
+| **1. Content Upload** | `dashboard/content/new/page.tsx` | `encryptContent()` - Encrypt before Walrus upload |
+| **2. Store Metadata** | `useCreatePost` | Store encryption metadata in `ContentPost.encryption_metadata` |
+| **3. Access Check** | `creators/[address]/posts/[id]/page.tsx` | Check if user has valid subscription NFT |
+| **4. Session Key** | `useZkLogin` | `createSealSessionKey()` - Create decryption session |
+| **5. Verification Tx** | Content viewer | `createAccessVerificationTx()` - Prove NFT ownership |
+| **6. Decrypt** | Content viewer | `decryptContent()` - Decrypt and display |
+
+### **Encryption Decision Logic**
+
+**Gated Content (Tier > 0)**:
+- File → Seal encryption → Walrus upload → Store blob ID + encryption metadata on-chain
+- Implementation: `dashboard/content/new/page.tsx`
+
+**Public Content (Tier = 0)**:
+- File → Direct Walrus upload → Store blob ID on-chain
+- No encryption metadata needed
+
 
 #### **Encryption Flow**
 1. Define access policy (NFT type, min tier, creator)
@@ -723,11 +262,91 @@ auriya/
 4. Decrypt content client-side
 5. Display content
 
-**Implementation**: `frontend/src/lib/seal/decrypt.ts`
+Implementation: `frontend/src/lib/seal/decrypt.ts`
 
 ---
 
-## 🔗 Sui Stack Integration
+
+## 📜 Smart Contracts
+
+**Full documentation**: [CONTRACT.md](./CONTRACT.md)
+
+### **Deployed Contracts (Sui Testnet)**
+
+| Contract | Package ID | Purpose |
+|----------|------------|----------|
+| **Creator Profile** | `0x1ba3dac9...` | Creator identities with Walrus-stored media |
+| **Subscription** | `0x9e0516bd...` | NFT-based subscriptions with 97/3 revenue split |
+| **Content** | `0x35bfc572...` | Content registry with Walrus blob IDs |
+| **Landing Page** | `0x4b97d0f4...` | Landing page configs stored on Walrus |
+| **Seal Access** | `0x1435b35c...` | Access policies for encrypted content |
+
+**Key Features**:
+- `creator_profile.move` - Create/update profiles, link SuiNS
+- `subscription.move` - Mint NFTs, handle renewals, 97% revenue to creator
+- `content.move` - Create posts, set tier access, track views/likes
+- `creator_landing.move` - Create/publish landing pages
+- `content_access.move` - Seal integration for access verification
+
+## 👥 User Flows
+
+More Detailed User Flows are in [User_Flow.md](User_Flow.md)
+
+```
+Creator uploads content → Walrus (permanent storage)
+                       ↓
+                    Sets tier requirement (Bronze/Silver/Gold)
+                       ↓
+                    Fan purchases Subscription NFT
+                       ↓
+                    Smart contract verifies NFT ownership
+                       ↓
+                    Seal decrypts content → Fan accesses from Walrus
+```
+
+
+## ✨ Key Features
+
+### **For Creators**
+1. **Profile Creation** - Create on-chain identity with Walrus-stored media
+2. **Tier Management** - Set up Bronze/Silver/Gold subscription tiers
+3. **Content Publishing** - Upload to Walrus, encrypt with Seal (optional)
+4. **Landing Page Builder** - Customizable landing pages stored on Walrus
+5. **Direct Donations** - Accept SUI donations from supporters (NEW)
+6. **Analytics Dashboard** - Track subscribers, revenue, views, likes
+7. **97% Revenue Share** - Keep nearly all earnings (3% platform fee)
+
+### **For Subscribers**
+1. **zkLogin Authentication** - Sign in with Google (no seed phrases)
+2. **NFT Subscriptions** - Transferable, tradeable access tokens
+3. **Tier-Based Access** - Bronze/Silver/Gold content gating
+4. **Encrypted Content** - Seal-protected premium content
+5. **Direct Support** - Donate any amount in SUI to creators
+6. **Subscription Management** - Renew, cancel, transfer NFTs
+
+### **Platform Features**
+1. **Permanent Storage** - All content on Walrus (censorship-resistant)
+2. **Instant Payments** - On-chain settlement (no delays)
+3. **No Deplatforming** - Creators own their content and audience
+4. **Secondary Market** - Trade subscription NFTs on marketplaces
+5. **Privacy** - Optional zkLogin (no email required)
+
+
+
+## ⚙️ Tech Stack
+
+### **Frontend Architecture**
+
+#### **Tech Stack**
+- **Framework**: Next.js 15 (App Router with React Server Components)
+- **Language**: TypeScript 5.3 (strict mode)
+- **Styling**: Tailwind CSS 3.4 + Shadcn UI components
+- **State Management**: 
+  - React Query (server state)
+  - Zustand (client state)
+  - @mysten/dapp-kit (wallet state)
+- **Blockchain Integration**: @mysten/sui.js v1.0+
+- **Authentication**: Sui zkLogin
 
 ### **1. Sui Blockchain - Smart Contract Logic**
 
@@ -807,62 +426,6 @@ auriya/
 
 ---
 
-## 📜 Smart Contract Specifications
-
-### **1. creator_profile.move**
-- **Path**: `backend/move/creator_profile/sources/creator_profile.move`
-- **Structs**: `CreatorProfile` (identity, bio, revenue tracking)
-- **Key Functions**:
-  - `create_profile()` - Deploy creator profile with Walrus avatar/banner
-  - `update_profile()` - Update metadata
-  - `increment_subscribers()` - Called by subscription contract
-  - `add_revenue()` - Track earnings
-
-### **2. subscription.move**
-- **Path**: `backend/move/subscription/sources/subscription.move`
-- **Structs**: `SubscriptionNFT`, `CreatorSubscriptions`, `TierConfig`
-- **Key Functions**:
-  - `purchase_subscription()` - Mint NFT, split payment 98/2
-  - `is_valid()` - Check expiry
-  - `has_access()` - Verify tier + creator + expiry
-
-### **3. content.move**
-- **Path**: `backend/move/content/sources/content.move`
-- **Structs**: `ContentPost` (Walrus blob ID, Seal policy ID, tier requirement)
-- **Key Functions**:
-  - `create_post()` - Publish content with tier gate
-  - `increment_views()` - Track analytics
-  - `like_post()` - Engagement metrics
-  - `can_access()` - Access control verification
-
-### **4. membership_tiers.move**
-- **Path**: `backend/move/membership_tiers/sources/membership_tiers.move`
-- **Structs**: `MembershipTiers`, `TierInfo` (Bronze/Silver/Gold)
-- **Key Functions**:
-  - `create_tiers()` - Configure pricing & benefits
-  - `update_tier_price()` - Dynamic pricing
-
-### **5. landing_page.move**
-- **Path**: `backend/move/landing_page/sources/landing_page.move`
-- **Purpose**: Customizable creator pages stored on Walrus
-
----
-
-### **Contract Testing**
-
-**Commands**: `sui move test`, `sui move test --filter <module>`, `sui move test --coverage`
-
-**Test Coverage** (80%+):
-- ✅ Profile creation and updates
-- ✅ Subscription purchase and expiry
-- ✅ Access control logic
-- ✅ Revenue distribution (98/2 split)
-- ✅ Tier configuration
-- ✅ Content post creation
-- ✅ View/like increments
-
----
-
 ## ✨ Key Features
 
 ### **For Creators**
@@ -889,69 +452,6 @@ auriya/
 
 ---
 
-## 🎯 Hackathon Track Alignment
-
-### **Primary: Data Marketplaces ⭐⭐⭐⭐⭐**
-
-Auriya is a **decentralized data marketplace** where:
-
-✅ **Provable Ownership** - Creators own content, fans own access rights (NFTs)  
-✅ **Pricing Mechanisms** - Tiered subscriptions with transparent fees  
-✅ **Data Exchange** - Creators upload to Walrus → Fans pay → Access content  
-✅ **Preserves Data** - Exclusive content stored permanently on Walrus  
-✅ **Protects Free Speech** - Censorship-resistant, no platform can ban creators
-
-**10x Better Than Centralized:**
-- Patreon: 20% fees → Auriya: **5% fees**
-- Patreon: Can ban creators → Auriya: **Censorship-resistant**
-- Patreon: Platform owns data → Auriya: **Creator owns everything**
-
----
-
-### **Secondary: Data Security & Privacy ⭐⭐⭐⭐**
-
-✅ **zkLogin Privacy** - No emails on-chain, anonymous access  
-✅ **Seal Encryption** - Premium content encrypted, NFT-gated decryption  
-✅ **Decentralized Storage** - No centralized database, no data breaches  
-✅ **Compliance** - GDPR-friendly, no PII storage
-
----
-
-### **Bonus: Best Tech Implementation ⭐⭐⭐⭐⭐**
-
-✅ **Walrus** - All content stored (50+ blobs)  
-✅ **Seal** - Content encryption with NFT-based policies  
-✅ **Sui Move** - 5 smart contracts with complex access control  
-✅ **zkLogin** - Seamless Web2-like onboarding  
-✅ **SuiNS** - Human-readable creator identities
-
----
-
-## 📈 Market Opportunity
-
-### **Total Addressable Market**
-
-- **Creator Economy**: $104.2B (2024) → $480B (2027)
-- **Patreon**: 250K creators, $3.5B paid to creators
-- **OnlyFans**: 3M creators, $5.5B annual revenue
-- **Substack**: 2M writers, $300M+ paid to creators
-
-### **Target Segments**
-
-1. **Crypto-Native Creators** (50K) - NFT artists, Web3 educators
-2. **Deplatformed Creators** (10K) - Banned from Patreon/OnlyFans
-3. **Privacy-Conscious Creators** (5K) - Journalists, activists
-4. **Mainstream Creators** (10M+) - Musicians, artists, educators
-
-### **Competitive Advantage**
-
-| Platform | Fee | Censorship | Ownership | Transferable |
-|----------|-----|------------|-----------|--------------|
-| Patreon | 15% | High | Platform | No |
-| OnlyFans | 20% | High | Platform | No |
-| **Auriya** | **5%** | **None** | **Creator** | **Yes** |
-
----
 
 ## 🚀 Getting Started
 
@@ -999,84 +499,44 @@ sui client publish --gas-budget 100000000
 
 ## 🗺️ Roadmap
 
-### **Phase 1: Foundation** ✅ (Current)
-- [x] Next.js frontend with Sui integration
-- [x] zkLogin authentication
-- [x] Walrus integration (upload/download)
-- [x] Basic Move contracts
-- [x] Landing page builder
+### **✅ Completed (Hackathon)**
+- [x] Next.js 15 frontend with Sui integration
+- [x] zkLogin authentication (Google OAuth)
+- [x] Walrus integration (upload/download with progress tracking)
+- [x] 5 Move smart contracts deployed on testnet
+- [x] Creator profile creation with Walrus-stored media
+- [x] Landing page builder with Walrus storage
+- [x] Subscription tier management (Bronze/Silver/Gold)
+- [x] NFT-based subscriptions with 97/3 revenue split
+- [x] Content upload with Walrus integration
+- [x] Seal encryption for gated content
+- [x] Content viewing with Seal decryption
+- [x] Direct SUI donations to creators
+- [x] Analytics dashboard (subscribers, revenue, views)
+- [x] Responsive UI with Tailwind CSS
 
-### **Phase 2: Core Features** (Weeks 1-2)
-- [ ] Tier-based content access
-- [ ] Subscription NFT minting
-- [ ] Content paywall UI
-- [ ] Revenue dashboard
-- [ ] Seal encryption integration
+### ** Phase 2: Q1 2026**
+- [ ] Subscription renewal automation
+- [ ] Content recommendations algorithm
+- [ ] Creator verification badges
+- [ ] Enhanced analytics (engagement metrics)
+- [ ] Fiat on-ramps (Stripe integration)
+- [ ] Multi-language support
 
-### **Phase 3: Polish** (Weeks 3-4)
-- [ ] Mobile responsive design
-- [ ] Analytics dashboard
-- [ ] Creator onboarding flow
-- [ ] Video demo & documentation
-- [ ] Testnet deployment
-
-### **Phase 4: Launch** (Q1 2025)
-- [ ] Security audit
+### ** Phase 3: Q2 2026**
+- [ ] Creator DAOs for governance
+- [ ] AI-powered content moderation
 - [ ] Mainnet deployment
 - [ ] 100 creator beta
 - [ ] Marketing campaign
 - [ ] Mobile app (iOS/Android)
 
-### **Phase 5: Scale** (Q2-Q4 2025)
+### **Phase 4: Scale** (Q3-Q4 2026)
 - [ ] AI recommendations
 - [ ] Creator DAOs
 - [ ] Multi-chain support
 - [ ] Fiat on-ramps
 - [ ] 10K+ creators
-
----
-
-## 🏆 Why Auriya Will Win
-
-### **1. Perfect Track Fit**
-- Data Marketplaces: We ARE a data marketplace (creator content exchange)
-- Clear 10x story vs Patreon/OnlyFans
-- Addresses all track criteria (ownership, pricing, preservation, free speech)
-
-### **2. Deep Sui Stack Integration**
-- Walrus: All content stored (avatars, posts, videos, landing pages)
-- Seal: Content encryption with NFT-based access policies
-- Sui Move: 5 production-ready smart contracts
-- zkLogin: Seamless Web2-like onboarding
-- SuiNS: Human-readable creator identities
-
-### **3. Real Market Demand**
-- $104B+ creator economy
-- Proven demand (Patreon: 250K creators, OnlyFans: 3M creators)
-- Clear pain points (high fees, censorship, no ownership)
-- Web3-native creators ready to migrate
-
-### **4. Polished Execution**
-- Production-ready codebase (not a hackathon prototype)
-- Beautiful UI (Instagram-style content cards)
-- Smooth UX (zkLogin eliminates crypto friction)
-- Comprehensive documentation
-
-### **5. Compelling Demo**
-- Show creator uploading video to Walrus
-- Fan subscribing with one click (zkLogin)
-- Instant content access (NFT verification)
-- Compare to Patreon (10x better economics)
-
----
-
-## 📚 Documentation
-
-- **[Product Requirements](./documents/Product_Requirements.md)** - Feature specifications
-- **[Technical Architecture](./documents/TECHNICAL_ARCHITECTURE.md)** - System design
-- **[Implementation Plan](./documents/DETAILED_IMPLEMENTATION_PLAN.md)** - Build guide
-- **[Hackathon Strategy](./documents/HACKATHON_TRACK_ALIGNMENT.md)** - Track alignment
-- **[Pitch Deck](./documents/PITCH_DECK.md)** - Presentation slides
 
 ---
 
@@ -1092,15 +552,18 @@ sui client publish --gas-budget 100000000
 
 **Built for**: Walrus Haulout Hackathon 2025 🦭
 
+** Built by**: 
+Shikhar Singh ( senior full stack dev )
+Kryptonian ( full stack dev )
+
 ---
 
 ## 📞 Links
 
-- **GitHub**: [github.com/yourusername/auriya](https://github.com/yourusername/auriya)
-- **Demo**: [auriya.vercel.app](#)
-- **Video**: [YouTube Demo](#)
-- **Twitter**: [@AuriyaPlatform](#)
-- **Discord**: [Join Community](#)
+- **GitHub**: [github.com/0xshikhar/auriya](https://github.com/0xshikhar/auriya)
+- **Demo**: [auriya-chi.vercel.app](https://auriya-chi.vercel.app)
+- **Video**: [Video Demo](https://www.loom.com/share/18f2a5d9b7be47aa9c418b25c26610c8)
+- **Twitter**: [@0xShikhar](https://twitter.com/0xShikhar)
 
 ---
 
@@ -1108,6 +571,6 @@ sui client publish --gas-budget 100000000
 
 **Auriya: Own Your Content. Own Your Audience. Forever.**
 
-Built with ❤️ on Sui Stack (Sui + Walrus + Seal + zkLogin)
+Built with ❤️ on Walrus with Seal Encryption
 
 </div>
